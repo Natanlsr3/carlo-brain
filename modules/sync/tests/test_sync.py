@@ -3,6 +3,7 @@ import json
 import shutil
 import subprocess
 import sys
+import time
 import unittest
 from pathlib import Path
 
@@ -108,11 +109,18 @@ class SyncTest(unittest.TestCase):
             res = support.run_script(SRC / "sync.py", args=("end",), env=env.env(CARLO_HEADLESS="1"))
             self.assertEqual(res.returncode, 0)
             self.assertFalse((env.vault / ".git").exists())
-            res = support.run_script(SRC / "sync.py", args=("end", "--detach"), env=env.env())
-            self.assertEqual(res.returncode, 0)
             res = support.run_script(SRC / "sync.py", args=("end",), env=env.env())
             self.assertEqual(res.returncode, 0)
             self.assertIn("sync_end", cfg.last_runs())
+            marker = cfg.state_dir() / "runs" / "sync_end.txt"
+            before = marker.stat().st_mtime_ns
+            res = support.run_script(SRC / "sync.py", args=("end", "--detach"), env=env.env())
+            self.assertEqual(res.returncode, 0)
+            # wait for the background run to finish before the temp folder is removed
+            deadline = time.time() + 30
+            while time.time() < deadline and marker.stat().st_mtime_ns == before:
+                time.sleep(0.2)
+            time.sleep(0.5)
 
 
 if __name__ == "__main__":
