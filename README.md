@@ -109,6 +109,8 @@ git clone https://github.com/Natanlsr3/carlo-brain && cd carlo-brain
 carlo add proactive self-improve   # optional modules, any time
 ```
 
+Prerequisites: macOS or Linux, Python 3.9+, git, and [Claude Code](https://docs.claude.com/en/docs/claude-code) installed and logged in. If the installer says `carlo` is not on your PATH, run the one line it prints and open a new terminal.
+
 Then run `carlo doctor` to check the installation and start a new `claude` session. The first boot message confirms it works. Prerequisites and a step-by-step guide: [docs/02-install.md](docs/02-install.md).
 
 ## Privacy and risks

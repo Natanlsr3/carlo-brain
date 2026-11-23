@@ -103,6 +103,10 @@ def cmd_init(args: argparse.Namespace) -> int:
     say(f"Vault ready at {vault} ({len(created)} new files). CLAUDE.md block installed in {settings_io.claude_md_path()}.")
     link = link_cli(repo)
     say(f"CLI linked at {link}" if link else "CLI link skipped (a file already exists there).")
+    if link and str(Path(link).parent) not in os.environ.get("PATH", "").split(os.pathsep):
+        rc = "~/.zshrc" if os.environ.get("SHELL", "").endswith("zsh") else "~/.bashrc"
+        say("`carlo` is not on your PATH yet. Run this once, then open a new terminal:\n"
+            f"  echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> {rc}")
     return install_many(wanted, force=args.force) if wanted else 0
 
 

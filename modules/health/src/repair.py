@@ -89,11 +89,21 @@ def _tail(res: subprocess.CompletedProcess) -> str:
 
 # ------------------------------------------------------------------ safe plays
 
+def _real_home(home: Path) -> bool:
+    try:
+        import pwd
+        return Path(pwd.getpwuid(os.getuid()).pw_dir).resolve() == Path(home).resolve()
+    except (ImportError, KeyError, OSError):
+        return True
+
+
 def launchd_issues(ctx: Ctx) -> List[Issue]:
     """Carlo Brain launchd jobs whose plist exists but which launchd does not know (macOS)."""
     agents = ctx.home / "Library" / "LaunchAgents"
     if ctx.platform != "darwin" or not agents.is_dir():
         return []
+    if ctx.run is subprocess.run and (os.environ.get("CARLO_NO_LAUNCHD") or not _real_home(ctx.home)):
+        return []  # a throwaway HOME (tests, trials) must never load jobs into the user's real launchd session
     ignored = {str(n) for n in ctx.settings.get("ignore", [])}
     domain, issues = f"gui/{ctx.uid}", []
     for plist in sorted(agents.glob(f"{LAUNCHD_PREFIX}*.plist")):

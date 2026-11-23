@@ -224,6 +224,16 @@ def _launchctl(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["launchctl", *args], capture_output=True, text=True)
 
 
+def _real_home() -> bool:
+    """True when HOME is the login user's home. A throwaway HOME (tests, trials) must not load jobs
+    into the user's real launchd session, where they would outlive the temporary folder."""
+    try:
+        import pwd
+        return Path(pwd.getpwuid(os.getuid()).pw_dir).resolve() == Path.home().resolve()
+    except (ImportError, KeyError, OSError):
+        return True
+
+
 def install_launchd(module: Module) -> list:
     """macOS only: write plists and load them (skipped when CARLO_NO_LAUNCHD=1)."""
     if not module.launchd:
@@ -238,7 +248,9 @@ def install_launchd(module: Module) -> list:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(plistlib.dumps(build_plist(module, job)))
         notes.append(f"launchd job written: {path.name}")
-        if not os.environ.get("CARLO_NO_LAUNCHD"):
+        if not os.environ.get("CARLO_NO_LAUNCHD") and not _real_home():
+            notes.append(f"{path.name} not loaded: HOME is not your login home (test install)")
+        elif not os.environ.get("CARLO_NO_LAUNCHD"):
             domain = f"gui/{os.getuid()}"
             _launchctl("bootout", domain, str(path))
             res = _launchctl("bootstrap", domain, str(path))
