@@ -10,6 +10,8 @@ Gives the assistant a memory that survives sessions, without loading the whole v
 | SessionEnd | `session_end.py` | If the session wrote no `SESSION_LOG.md` entry, adds a mechanical one (`[auto]`) under the marker. Scores the session. Starts fact extraction in the background. |
 | PreCompact | `precompact.py` | Saves last messages, changed files, git commands and decisions to `state/compactions/` before context is lost; the next boot points to it. |
 
+Also in this module: the weekly **map refresh** (`refresh.py run`, a daily launchd job on macOS or a cron line on Linux that acts at most every 6 days). It runs `carlo scan --quick` on the folders you agreed to, compares the result with `MAP.md` and writes `boot.d/map-refresh.md` with up to 3 suggestions (new project, project inactive for 30 days or more, readable source not connected). The next session asks one closed question at a time and never edits `MAP.md` without your yes; `carlo scan --dismiss <id>` makes a declined suggestion stay quiet. It needs your earlier yes to the scan (given in `setup` or with `carlo scan --yes`). The boot hook also reminds you on the day of a planned setup session (`carlo setup plan`) and when a setup was left unfinished.
+
 Extra scripts you can run by hand (installed in `~/.carlo-brain/memory/`):
 
 - `health.py`: one line per problem (recent hook errors, session-end hook silent for a week, vault missing). Empty when fine. Shown at boot.

@@ -84,7 +84,7 @@ Per-feature details and how to trigger each one: [00-features.md](00-features.md
 
 ## An example MAP.md
 
-`setup` writes this file for you from five questions. If you prefer to edit it by hand, open `<vault>/00_System/MAP.md` (default vault `~/carlo-vault`), delete the `map-template` comment line, and say who you are, your main projects and where their files are. For example:
+`setup` writes this file for you from a scan of your computer and a short interview. If you prefer to edit it by hand, open `<vault>/00_System/MAP.md` (default vault `~/carlo-vault`), delete the `map-template` comment line, and say who you are, your main projects and where their files are. For example:
 
 ```markdown
 **Who**: Sam, product designer in Lyon. Likes short answers, works in the evening.
@@ -154,6 +154,8 @@ carlo doctor                           carlo config get|set <dotted.key> [json v
 carlo route status                     carlo route sync [--undo]
 carlo connect browser|codex|gemini [--remove|--status]
 carlo context [--copy] [--boot] [--refresh] [--max N]
+carlo scan [--quick|--full] [--background] [--status] [--yes] [--root DIR] [--dismiss ID]
+carlo setup [status|save STEP|plan --date D --time T|finish|reset]
 carlo uninstall [--purge]
 ```
 

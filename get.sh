@@ -45,4 +45,4 @@ case ":$PATH:" in
 esac
 
 echo
-echo "Next: run claude and type: setup (5 questions, it fills your map)"
+echo "Next: run claude and type: setup (it maps your computer while it asks you a few questions)"

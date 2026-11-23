@@ -46,7 +46,7 @@ class GetShTest(unittest.TestCase):
         self.assertTrue((self.home / "carlo-vault" / "00_System" / "MAP.md").exists(), "default vault ~/carlo-vault")
         self.assertTrue((self.home / ".claude" / "skills" / "setup" / "SKILL.md").exists())
         self.assertIn("export PATH=", first.stdout, "PATH line when ~/.local/bin is not on PATH")
-        self.assertEqual(first.stdout.strip().splitlines()[-1], "Next: run claude and type: setup (5 questions, it fills your map)")
+        self.assertEqual(first.stdout.strip().splitlines()[-1], "Next: run claude and type: setup (it maps your computer while it asks you a few questions)")
         second = run_get(self.home, self.source)
         self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
         self.assertIn("Updating", second.stdout)

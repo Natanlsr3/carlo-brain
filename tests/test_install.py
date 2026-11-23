@@ -158,7 +158,7 @@ class EndToEndTest(unittest.TestCase):
                 res = self.init(env, modules)
                 self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
                 lines = res.stdout.strip().splitlines()
-                self.assertEqual(lines[-2], "Next: run claude and type: setup (5 questions, it fills your map)")
+                self.assertEqual(lines[-2], "Next: run claude and type: setup (it maps your computer while it asks you a few questions)")
                 self.assertEqual(lines[-1], f"Or edit {env.vault / '00_System' / 'MAP.md'} by hand.")
 
     def test_setup_skill_is_installed_kept_if_yours_and_removed(self):

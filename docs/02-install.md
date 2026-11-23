@@ -72,7 +72,7 @@ Each line is `[ok]`, `[warn]` or `[FAIL]`. It checks Python, git and claude, tha
 
 ## 4. Fill in your MAP
 
-The easy way: run `claude` and type `setup`. The assistant asks at most 6 short questions, shows the `MAP.md` and project files it will write, and writes them on your `yes`. The first session proposes it by itself while `MAP.md` is still the template. To set up Codex or Gemini the same way, run `carlo connect codex` or `carlo connect gemini`, then ask for the `carlo-setup` skill (or `/carlo:setup` in Gemini).
+The easy way: run `claude` and type `setup`. The assistant asks for your yes, scans the folders it lists (read-only, local: `carlo scan`) while it asks you a few short questions, proposes your projects, shows the `MAP.md` and project files it will write, and writes them on your `yes`. If it is long, it books a session and resumes where it stopped. The first session proposes it by itself while `MAP.md` is still the template. To set up Codex or Gemini the same way, run `carlo connect codex` or `carlo connect gemini`, then ask for the `carlo-setup` skill (or `/carlo:setup` in Gemini).
 
 By hand: open the vault in Obsidian, delete the `map-template` comment line at the top, and edit `00_System/MAP.md`: who you are, your active projects with the entry file of each, where your todo list and contacts live, and any dictation shortcuts. Keep it short, it is read at every session start. This is the single most valuable five minutes of the setup.
 

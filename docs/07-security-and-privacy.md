@@ -10,6 +10,16 @@ An autonomous assistant makes three kinds of costly mistakes: it reads a secret,
 - **The briefing is built without any model call.** `proactive` reads mail and chat databases locally, in read-only mode, and writes a short file. That file contains names and short excerpts, so treat `~/.carlo-brain/state/` like your mail.
 - **Full message text is copied to disk only if you ask:** `sources.whatsapp.write_raw` (off by default) writes `raw_messages.md`, mode 0600, for the optional weekly triage.
 
+## What the computer scan reads
+
+`carlo scan` (run by the `setup` skill and, quick mode only, by the weekly map refresh) is read-only, local and uses the standard library only. It prints the folders it will scan and needs `--yes` or an interactive yes; the weekly refresh only ever scans the folders you agreed to.
+
+- **Reads:** file and folder names, sizes and dates; for each git repo the last commit date and the remote host only (no path, no credential); the first lines of a README and of the top recent Markdown or text files; presence of Obsidian vaults, Notion exports and Apple Notes (a count, no titles or text); the names of the MCP servers in Claude Code's JSON files (no commands, URLs or environment values).
+- **Probes only for presence:** the Mail, Messages, Contacts and Calendar locations and the WhatsApp bridge (the file is opened and closed, nothing is read), and which tools are installed (`claude`, `codex`, `gemini`, `git`, `gh`, `node`, `python3`, `docker`, `brew`).
+- **Never reads:** mail or message content, keys, `.env` and secret-looking files, `.ssh`, `.aws`, `.gnupg`, `Library`, shell profiles (the same deny list as `carlo search`), `node_modules`, `.git` internals beyond the remote host and last commit date, virtual environments. A README line that looks like a secret is replaced by a placeholder.
+- **Capped** in depth, entries and time (quick: depth 3 and 25 seconds; full: depth 6 and 15 minutes, can run in the background).
+- **Writes** only `~/.carlo-brain/state/scan/` (summary, JSON, progress, your consent) and `state/setup/` (your progress and planned session). It sends nothing anywhere. The results enter a session only when the assistant reads the summary during `setup`, so treat `state/scan/` like the rest of `state/`.
+
 ## Layer 1: secrets are never opened
 
 `security` blocks, in a `PreToolUse` hook on Bash, Read, Grep, Glob, Edit, Write and NotebookEdit:

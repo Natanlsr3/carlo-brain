@@ -1,4 +1,4 @@
-"""`carlo` command line: init, add, remove, list, status, doctor, connect, context, search, health, config, uninstall.
+"""`carlo` command line: init, add, remove, list, status, doctor, connect, context, scan, setup, search, health, config, uninstall.
 
 Python 3.9+, standard library only. Nothing here reads shell profiles, .env files or key contents.
 """
@@ -18,6 +18,8 @@ from typing import Optional
 import carlo_config as cfg
 import carlo_modules as mods
 import carlo_settings as settings_io
+import carlo_scan
+import carlo_setup
 import carlo_skills
 
 DEFAULT_MODULES = ("memory", "security")
@@ -112,7 +114,7 @@ def cmd_init(args: argparse.Namespace) -> int:
             f"  echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> {rc}")
     status = install_many(wanted, force=args.force) if wanted else 0
     if status == 0:
-        say("Next: run claude and type: setup (5 questions, it fills your map)")
+        say("Next: run claude and type: setup (it maps your computer while it asks you a few questions)")
         say(f"Or edit {vault / '00_System' / 'MAP.md'} by hand.")
     return status
 
@@ -448,6 +450,18 @@ def cmd_search(args: argparse.Namespace) -> int:
                           env={**os.environ, "CARLO_BRAIN_HOME": str(cfg.home())}).returncode
 
 
+# ---------------------------------------------------------------- scan / setup
+
+def cmd_scan(args: argparse.Namespace) -> int:
+    """Read-only map of this computer (see carlo_scan.py): consent first, nothing leaves the machine."""
+    return carlo_scan.run_cli(args)
+
+
+def cmd_setup(args: argparse.Namespace) -> int:
+    """Setup state: progress to resume, planned session. The interview itself is the `setup` skill in claude."""
+    return carlo_setup.run_cli(args.action, args.step or "", args.answer, args.done, args.date or "", args.time or "", args.clear)
+
+
 # ---------------------------------------------------------------- config / uninstall
 
 def cmd_config(args: argparse.Namespace) -> int:
@@ -524,6 +538,26 @@ def build_parser() -> argparse.ArgumentParser:
     ctx.add_argument("--refresh", action="store_true", help="regenerate the block of every connected tool")
     ctx.add_argument("--max", type=int, default=24000, help="character cap (default 24000)")
     ctx.set_defaults(func=cmd_context)
+    scan = sub.add_parser("scan", help="read-only map of your computer: projects, recent files, note apps, sources, tools",
+                          description="Local and read only. Prints the folders first and needs --yes (or an interactive yes). Results: ~/.carlo-brain/state/scan/")
+    scan.add_argument("--quick", action="store_true", help="about 30 seconds (default)")
+    scan.add_argument("--full", action="store_true", help="deeper, up to 15 minutes")
+    scan.add_argument("--background", action="store_true", help="run detached; follow with --status")
+    scan.add_argument("--status", action="store_true", help="show the progress of the last scan")
+    scan.add_argument("--yes", action="store_true", help="confirm the listed folders without a prompt")
+    scan.add_argument("--root", action="append", help="folder to scan instead of the defaults (repeatable)")
+    scan.add_argument("--max-seconds", type=int, help="override the time cap")
+    scan.add_argument("--dismiss", metavar="ID", help="never suggest this map refresh item again")
+    scan.set_defaults(func=cmd_scan)
+    st = sub.add_parser("setup", help="deep setup state: status, save, plan, finish, reset (the interview runs in claude: type setup)")
+    st.add_argument("action", nargs="?", default="status", choices=["status", "save", "plan", "finish", "reset"])
+    st.add_argument("step", nargs="?", help="save: step name (" + ", ".join(carlo_setup.STEPS) + ")")
+    st.add_argument("--answer", action="append", default=[], metavar="KEY=VALUE", help="save: an answer to keep (repeatable)")
+    st.add_argument("--done", action="store_true", help="save: the step is finished")
+    st.add_argument("--date", help="plan: YYYY-MM-DD")
+    st.add_argument("--time", help="plan: HH:MM")
+    st.add_argument("--clear", action="store_true", help="plan: remove the planned session")
+    st.set_defaults(func=cmd_setup)
     rt = sub.add_parser("route", help="apply routing.json to Claude Code: model fields and routed wrapper agents")
     rt.add_argument("action", choices=["status", "sync"])
     rt.add_argument("--undo", action="store_true", help="with sync: restore the original model fields, remove wrappers")

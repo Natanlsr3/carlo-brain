@@ -12,6 +12,7 @@ import json
 import os
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -23,6 +24,11 @@ import carlo_config as cfg  # noqa: E402
 import filters  # noqa: E402
 import health  # noqa: E402
 import sessionlog  # noqa: E402
+
+try:  # an older ~/.carlo-brain/lib has no carlo_setup yet: skip the reminders instead of breaking the hook
+    import carlo_setup  # noqa: E402
+except ImportError:
+    carlo_setup = None
 
 MAX_CONTEXT = 9000  # Claude Code truncates hook output around 10,000 characters
 MAX_ENTRY = 1500
@@ -136,6 +142,9 @@ def build_context(event: dict, now=None) -> str:
     sections += dropins(cfg.boot_dir())
     if system and map_is_template(system):
         sections.append(("Setup", "MAP.md is still the template: offer the user to run the setup interview (say 'setup')."))
+    reminders = carlo_setup.reminders((now or datetime.now()).date()) if carlo_setup else []
+    if reminders:
+        sections.append(("Setup", "\n".join(reminders)))
     note = compaction_note(event)
     if note:
         sections.append(note)

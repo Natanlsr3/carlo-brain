@@ -21,3 +21,11 @@ timeout = 10
 event = "PreCompact"
 command = "{PY} -I {CODE}/precompact.py"
 timeout = 10
+
+# Once a day at 10:00 (launchd runs a missed slot after wake). The script acts at most every 6 days, needs the
+# earlier consent from `carlo scan --yes`, and only writes a short boot.d note. On Linux the CLI prints a cron line.
+[[launchd]]
+label = "map-refresh"
+command = "{PY} -I {CODE}/refresh.py run"
+hour = 10
+minute = 0
