@@ -10,7 +10,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python: ["3.9", "3.12"]
+        python: ["3.10", "3.12"]
+        include:
+          # Python 3.9 is no longer published for the newest Ubuntu image; keep covering it on macOS.
+          - os: macos-latest
+            python: "3.9"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

@@ -133,7 +133,9 @@ class ConnectorTests(Base):
     def test_mcp_servers_expected_vs_listed(self):
         class Res:
             stdout = "vault: https://x - connected\nbroken: cmd - Failed to connect\n"
-        out = {f.name: f.level for f in wd.check_mcp(["vault", "broken", "absent"], run=lambda *a, **k: Res())}
+        from unittest import mock
+        with mock.patch.object(wd.shutil, "which", return_value="/usr/local/bin/claude"):
+            out = {f.name: f.level for f in wd.check_mcp(["vault", "broken", "absent"], run=lambda *a, **k: Res())}
         self.assertEqual(out, {"mcp:vault": wd.OK, "mcp:broken": wd.FAIL, "mcp:absent": wd.FAIL})
         self.assertEqual(wd.check_mcp([]), [])
 

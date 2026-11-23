@@ -104,11 +104,12 @@ class SyncTest(unittest.TestCase):
 
     def test_hook_detach_returns_immediately_and_headless_noop(self):
         with support.BrainEnv() as env:
-            res = support.run_script(SRC / "sync.py", args=("end", "--detach"), env=env.env())
-            self.assertEqual(res.returncode, 0)
+            # headless first: the detached run below keeps working in the background and may init the vault
             res = support.run_script(SRC / "sync.py", args=("end",), env=env.env(CARLO_HEADLESS="1"))
             self.assertEqual(res.returncode, 0)
             self.assertFalse((env.vault / ".git").exists())
+            res = support.run_script(SRC / "sync.py", args=("end", "--detach"), env=env.env())
+            self.assertEqual(res.returncode, 0)
             res = support.run_script(SRC / "sync.py", args=("end",), env=env.env())
             self.assertEqual(res.returncode, 0)
             self.assertIn("sync_end", cfg.last_runs())
