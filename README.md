@@ -4,21 +4,89 @@
 ![status](https://img.shields.io/badge/status-beta%200.1-orange)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 
-**A Jarvis for Claude Code: a personal agentic system with a structured memory, specialist subagents with ready-made prompts, agents that review and improve it, and connectors to your tools. All in Markdown you own.**
+**A Jarvis for Claude Code: a second brain made of Markdown notes you own. It remembers your projects between sessions, opens each day with a short briefing, and never sends anything without your "go".**
 
 ![A Claude Code session opening with the Carlo Brain boot briefing](docs/assets/boot.gif)
 
-Built for Claude Code, the same brain also plugs into OpenAI Codex CLI, Google Gemini CLI and any other LLM (see [Use it with Codex, Gemini or any LLM](#use-it-with-codex-gemini-or-any-llm)). Claude Code stays the most complete.
+Works with Claude Code (the most complete), OpenAI Codex CLI, Google Gemini CLI and any other LLM. Open source, no server, no account. Français : [démarrage rapide](docs/FR-demarrage.md).
 
-**Stable:** core, memory, security and sync. **Beta:** everything else (proactive, connectors, self-improve, night, agents-skills, review-loop, health, search, other-agents).
+```bash
+git clone https://github.com/Natanlsr3/carlo-brain && cd carlo-brain
+./install.sh      # asks 3 questions, then tells you which file to fill in
+claude            # after you fill in MAP.md (5 minutes)
+```
 
-Claude Code starts every session blind. Carlo Brain gives it the rest of an assistant, the way a Chief of Staff or a Jarvis would work:
+**Start here:** [Your first 10 minutes](#your-first-10-minutes) | [Everything it can do (one page)](docs/00-features.md) | [Install guide](docs/02-install.md)
 
-- **A memory map, loaded lazily.** Your notes live in a structured Obsidian vault. At boot the assistant gets only a short map (who you are, which projects, where each entry file is) and the last few sessions, capped at 9,000 characters. Everything else is read on demand, by branch: the project file the map names, a skill, the archive.
+**Contents**
+
+- [Quickstart](#quickstart) and [Your first 10 minutes](#your-first-10-minutes)
+- [What it is](#what-it-is), [Why not just CLAUDE.md?](#why-not-just-claudemd-or-a-memory-plugin) and [A day with it](#a-day-with-it)
+- [What you get, by module](#what-you-get-by-module)
+- [Use it with Codex, Gemini or any LLM](#use-it-with-codex-gemini-or-any-llm)
+- [Privacy and risks](#privacy-and-risks)
+- [Documentation](#documentation), [Words used here](#words-used-here) and [Command line](#command-line)
+- [How it fits together](#how-it-fits-together), [Status](#status), [Contributing](#contributing), [License](#license)
+
+## Quickstart
+
+```bash
+git clone https://github.com/Natanlsr3/carlo-brain && cd carlo-brain
+./install.sh                                          # asks for a vault folder, a name for your assistant, your first name
+carlo add agents-skills search review-loop health     # optional modules that work with no setup, any time
+```
+
+Prerequisites: macOS or Linux, Python 3.9+, git, and [Claude Code](https://docs.claude.com/en/docs/claude-code) installed and logged in. If the installer says `carlo` is not on your PATH, run the one line it prints and open a new terminal.
+
+Two modules need a source connected first, or they have nothing to show: **`proactive`** (the morning briefing) needs WhatsApp, Apple Mail or a todo export, and **`connectors`** (Apple apps, WhatsApp, Google, Notion, Slack) needs the login or bridge of each one. Set the source up, then `carlo add proactive connectors`. Step by step: [docs/03-connect-your-sources.md](docs/03-connect-your-sources.md).
+
+Then run `carlo doctor` to check the installation. The last line of the installer already says what to do next: fill in your map. Prerequisites and a step-by-step guide: [docs/02-install.md](docs/02-install.md).
+
+## Your first 10 minutes
+
+**1. Fill in your map (5 minutes).** Open `<vault>/00_System/MAP.md` (the default vault is `~/carlo-vault`) in Obsidian or any editor. This short file is read at every session start. Without it the first boot is empty. Say who you are, your three main projects, and where their files are. For example:
+
+```markdown
+**Who**: Sam, product designer in Lyon. Likes short answers, works in the evening.
+**Active projects** (read the entry file BEFORE working on a project):
+- Website redesign: new pricing page, checkout tests still red. Entry file: `10_Projects/website/website.md`.
+- Freelance clients: two invoices to chase. Entry file: `10_Projects/clients/clients.md`.
+- Spanish course: 20 minutes a day. Entry file: `10_Projects/spanish/spanish.md`.
+**Where to look for more**: todo in Apple Reminders, contacts in the Contacts app.
+```
+
+The entry files can be three lines each. Create them as you go.
+
+**2. Start `claude` and read the first message.** Run `claude` in any terminal. The assistant opens with a one-sentence "Ready" that recalls what it knows (your map, recent sessions, anything that needs attention). On day one it has no history yet, so the message is short. Nothing there? Run `carlo doctor`, then see the [FAQ](docs/09-faq.md#nothing-appears-at-session-start).
+
+**3. Try three things.**
+
+- Do one small task, quit (`/exit`), start `claude` again and type: `What did we do last session?` The answer comes from `SESSION_LOG.md`.
+- Correct it once, for example: `Answer in two lines maximum from now on. Remember this.` It shows you the change as a diff, you say `yes`, and a new entry appears in `<vault>/00_System/CORRECTIONS.md`.
+- In a terminal: `carlo search "pricing"` (use a word from your map). It lists `path:line: snippet` from your vault and folders. It needs the `search` module from the quickstart.
+
+**4. Add the next module, knowing what it needs first.**
+
+- `agents-skills`, `search`, `review-loop`, `health`: nothing. Just `carlo add`.
+- `sync`: git. A private remote is optional ([module README](modules/sync/README.md)).
+- `proactive`: a source connected first (WhatsApp bridge, Apple Mail with Full Disk Access, or a todo export), then enable it in `~/.carlo-brain/config.d/proactive.json`. Without one the briefing stays empty. [docs/03](docs/03-connect-your-sources.md).
+- `connectors`: pick one connector and follow its guide. Each has its own login.
+- `self-improve` and `night`: a long-lived login for unattended jobs (`create_token.sh`), and a dry run first. Read the Known limits in their READMEs.
+- `other-agents`: Codex CLI or Gemini CLI installed, then `carlo connect codex` or `carlo connect gemini`.
+
+The full list of features, with how to trigger each one, is on [one page](docs/00-features.md).
+
+## What it is
+
+Claude Code starts every session blind. Carlo Brain gives it the rest of an assistant, the way a Chief of Staff or a Jarvis would work. It uses **hooks** (small scripts that Claude Code runs at fixed moments, such as session start and end) and, for work between sessions, **scheduled jobs** (macOS launchd, the built-in scheduler; a cron line on Linux).
+
+- **A memory map, loaded lazily.** Your notes live in a structured Obsidian vault (a folder of Markdown files). At boot the assistant gets only a short map (who you are, which projects, where each entry file is) and the last few sessions, capped at 9,000 characters. Everything else is read on demand, by branch: the project file the map names, a skill, the archive.
 - **Specialist subagents with ready prompts.** A researcher, a reviewer, a cto, a reader, and more, each a Markdown file with its own role, tools and rules. The main assistant delegates instead of filling its own context.
 - **Agents that watch and improve.** A proactive layer reads your mail, chats and todo and opens the day with a ranked briefing. Weekly jobs audit your own setup and propose changes; code, not the model, decides what gets applied.
-- **Connectors.** Apple apps, WhatsApp, Google, Notion, Slack, a browser (Claude in Chrome or Playwright), web research, your phone, and OpenRouter if you want to send a task to a model other than Claude.
+- **Connectors.** Apple apps, WhatsApp, Google, Notion, Slack, a browser (Claude in Chrome, or Playwright through MCP, a standard way to plug tools into an AI assistant), web research, your phone, and OpenRouter if you want to send a task to a model other than Claude.
 - **Safeguards.** Nothing is sent without your "go". Secrets are never opened. Every send is audited.
+
+**Stable:** core, memory, security and sync. **Beta:** everything else (proactive, connectors, self-improve, night, agents-skills, review-loop, health, search, other-agents).
 
 No server, no database, no SaaS: Python standard library and plain files. You pick the modules you want and remove them with one command.
 
@@ -84,37 +152,7 @@ Install what you want. The core is always installed. `memory` and `security` are
 
 Platform: macOS and Linux. Python 3.9 or newer, standard library only. On Linux, modules that use launchd print a cron line instead, and the Apple readers are not available.
 
-## What exists today, and what is missing
-
-Checked against the code of this repository.
-
-**Exists**
-- **Agents** (`modules/agents-skills/src/agents`): `researcher`, `reviewer`, `cto`, `reader`, `listener`, `improver`, `video-quiz`. Skills: `writer`, `docs`, `explainer`. Installed without overwriting yours. Beta: the files and installer are tested, the quality of the answers is yours to judge.
-- **Memory map and lazy loading** (`core` and `memory`): `MAP.md` and `SYSTEM_PROMPT.md` imported at start, a boot hook capped at 9,000 characters, a `boot.d` folder where any module leaves a note for the next session, everything else read on demand. Stable.
-- **Review**: the `reviewer` agent (read only, ranks findings by severity) for finished work; the `improver` agent and weekly job for your own setup; the `review` tier of self-improve, which turns risky changes into a diff for you to read.
-- **Proactive**: the `proactive` module (WhatsApp, Apple Mail, todo, follow-ups, briefing without a model call), the `listener` agent, and the weekly `self-improve` scout and improver jobs. `carlo doctor` and a health line at boot report broken hooks and sources. Beta.
-- **Browser** (`connectors/browser`, beta): `carlo connect browser` registers the Playwright MCP server (idempotent, removable, version can be pinned), `carlo doctor` checks it, and the `browse` skill enforces the rules (own tab, no form, payment or login without your go). Claude in Chrome and hosted automation stay guides.
-- **Routing to other models** (`connectors/openrouter`, beta): a script for any OpenAI-compatible endpoint, plus `route.py`, which sends a task to the model configured for an agent or a task kind (`config.d/routing.json`) and falls back to Claude on error. `carlo route sync` applies that file inside Claude Code: an entry like `"researcher": "claude:haiku"` sets the `model:` field of the installed agent (backup of the original, `--undo` restores), and `"researcher": "openrouter:<model>"` generates a `researcher-routed` wrapper agent (Bash only, calls `route.py` with the role prompt) plus a small skill telling the assistant to prefer it for the routed task kinds. `carlo route status` and `carlo doctor` show drift. Tested with HTTP and `claude` mocked. Limits: Claude Code still cannot swap a model by itself, so a non-Claude model is used only when the assistant chooses the `-routed` agent (the skill nudges it, nothing forces it); a wrapper returns text only, with none of the original agent's tools; `CLAUDE_CODE_SUBAGENT_MODEL` or a per-call model overrides the `model:` field; after a sync, `agents-skills` treats the edited agent file as yours (it keeps it and saves its version as `.new`), so re-run `carlo route sync` after changing agents.
-- **Review loop** (`review-loop`, beta): an opt-in `Stop` hook that asks the assistant to run the `reviewer` agent when a session changed code, once per diff and capped per session, switchable with `carlo config`.
-- **Watchdog and self-repair** (`health`, beta): checks that scheduled jobs ran within their interval and that connectors still work (login token file, WhatsApp and Apple databases, Telegram token, expected MCP servers). Your next session hears about it only when something is broken; a missed job is relaunched once; `carlo doctor` shows the same status. A repair playbook fixes the safe cases on its own, once per failure per 24 hours, each logged: an unloaded launchd job, a vanished MCP server (command stored in config), a dead WhatsApp bridge, an oversized log, a missing state folder. An expired login, a lost Full Disk Access or a missing key are never touched: the exact one-line command reaches your next session. `carlo health status`, `carlo health repair [--dry-run]`, off switch in config.
-- **Search over your computer** (`search`, beta): `carlo search "words"` is read-only and looks in the vault, your folders, Apple Notes, Messages and Mail (Spotlight optional). It reads inside PDF (`pdftotext`, else macOS `mdimport`/Spotlight text), `.docx`, `.pptx`, `.xlsx` and Apple Mail message bodies (Sent included), with a file name fallback. Results are `path:line: snippet`, capped, with a deny list for keys, `.env`, `.ssh` and shell profiles, size caps, a time budget, redaction of secret-looking lines, and an optional redacted text cache (`--rebuild-cache`). The `find-it` skill makes the assistant look before it asks.
-
-**Still missing, and how to add it**
-- **Repair of what needs you, and search by meaning.** A lost permission, an expired login and a missing key stay a one-line instruction on purpose. Search has no embedding index, no OCR, and does not read mail attachments or old Office formats; add a local index as a connector (a read-only MCP server, like `connectors/vault-mcp`) if you need that.
-
-New pieces follow the module convention: a folder with `module.toml`, scripts, a README, tests. See [docs/04-extend.md](docs/04-extend.md).
-
-## Quickstart
-
-```bash
-git clone https://github.com/Natanlsr3/carlo-brain && cd carlo-brain
-./install.sh                       # asks for a vault folder, a name for your assistant, your first name
-carlo add proactive self-improve   # optional modules, any time
-```
-
-Prerequisites: macOS or Linux, Python 3.9+, git, and [Claude Code](https://docs.claude.com/en/docs/claude-code) installed and logged in. If the installer says `carlo` is not on your PATH, run the one line it prints and open a new terminal.
-
-Then run `carlo doctor` to check the installation and start a new `claude` session. The first boot message confirms it works. Prerequisites and a step-by-step guide: [docs/02-install.md](docs/02-install.md).
+Per-feature details and how to trigger each one: [docs/00-features.md](docs/00-features.md).
 
 ## Use it with Codex, Gemini or any LLM
 
@@ -137,7 +175,47 @@ Short version; the full one is [docs/07-security-and-privacy.md](docs/07-securit
 - **Prompt injection is not solved.** A web page, mail or chat can contain text aimed at the assistant. The guards reduce the damage; they do not recognise every attack. It is a seat belt, not a sandbox.
 - **Unattended jobs.** Night tasks, the weekly self-improve jobs and the Telegram bridge run without you, with every send tool denied. They can still write files: night tasks write drafts and reports; self-improve may edit your vault `memory/` and `skills/` folders, your agents and skills, and JSON config (with backup and checks), and a change to your system prompt or settings waits as a diff for you; anything near secrets is refused. The Telegram bridge is read only by default.
 
-## Architecture
+## Documentation
+
+0. [Everything Carlo Brain can do](docs/00-features.md)
+1. [What it is and why](docs/01-what-and-why.md)
+2. [Install](docs/02-install.md)
+3. [Connect your sources](docs/03-connect-your-sources.md)
+4. [Extend it: skills, agents, hooks, jobs, modules](docs/04-extend.md)
+5. [Architecture: how everything branches together](docs/05-architecture.md)
+6. [Day to day: the rituals](docs/06-day-to-day.md)
+7. [Security and privacy](docs/07-security-and-privacy.md)
+8. [Costs and limits](docs/08-costs-and-limits.md)
+9. [FAQ](docs/09-faq.md)
+10. [What exists today, and what is missing](docs/10-what-exists-today.md)
+
+Français : [démarrage rapide](docs/FR-demarrage.md).
+
+Each module also has its own README in `modules/<name>/README.md`.
+
+## Words used here
+
+- **Hook**: a small script Claude Code runs at a fixed moment (session start, before a tool call, session end).
+- **Vault**: your folder of Markdown notes, opened comfortably in Obsidian.
+- **launchd**: the macOS built-in scheduler for jobs that run while you do not. On Linux a cron line replaces it.
+- **MCP** (Model Context Protocol): a standard way to plug a tool, such as a browser, into an AI assistant.
+- **`boot.d`**: a folder where any module leaves a note for the next session (`~/.carlo-brain/state/boot.d/`).
+- **Subagent**: a specialist the main assistant hands a job to, defined by one Markdown file.
+
+## Command line
+
+```text
+carlo init [--vault DIR] [--name NAME] [--user NAME] [--modules a,b|none] [--yes] [--force]
+carlo add <module>... [--force]        carlo remove <module>... [--force]
+carlo list                             carlo status
+carlo doctor                           carlo config get|set <dotted.key> [json value]
+carlo route status                     carlo route sync [--undo]
+carlo connect browser|codex|gemini [--remove|--status]
+carlo context [--copy] [--boot] [--refresh] [--max N]
+carlo uninstall [--purge]
+```
+
+## How it fits together
 
 ```mermaid
 flowchart LR
@@ -159,34 +237,7 @@ flowchart LR
     CN --> P
 ```
 
-The one convention that makes it modular: any module can add a section to the next session by dropping a Markdown file in `~/.carlo-brain/state/boot.d/`. The boot injector merges them, caps the total, and never fails the session. Details: [docs/05-architecture.md](docs/05-architecture.md).
-
-## Documentation
-
-1. [What it is and why](docs/01-what-and-why.md)
-2. [Install](docs/02-install.md)
-3. [Connect your sources](docs/03-connect-your-sources.md)
-4. [Extend it: skills, agents, hooks, jobs, modules](docs/04-extend.md)
-5. [Architecture: how everything branches together](docs/05-architecture.md)
-6. [Day to day: the rituals](docs/06-day-to-day.md)
-7. [Security and privacy](docs/07-security-and-privacy.md)
-8. [Costs and limits](docs/08-costs-and-limits.md)
-9. [FAQ](docs/09-faq.md)
-
-Each module also has its own README in `modules/<name>/README.md`.
-
-## Command line
-
-```text
-carlo init [--vault DIR] [--name NAME] [--user NAME] [--modules a,b|none] [--yes] [--force]
-carlo add <module>... [--force]        carlo remove <module>... [--force]
-carlo list                             carlo status
-carlo doctor                           carlo config get|set <dotted.key> [json value]
-carlo route status                     carlo route sync [--undo]
-carlo connect browser|codex|gemini [--remove|--status]
-carlo context [--copy] [--boot] [--refresh] [--max N]
-carlo uninstall [--purge]
-```
+The one convention that makes it modular: any module can add a section to the next session by dropping a Markdown file in `~/.carlo-brain/state/boot.d/`. The boot injector merges them, caps the total, and never fails the session. Details: [docs/05-architecture.md](docs/05-architecture.md). What each module does today and what is still missing: [docs/10-what-exists-today.md](docs/10-what-exists-today.md).
 
 ## Status
 

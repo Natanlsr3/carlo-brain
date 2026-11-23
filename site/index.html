@@ -182,6 +182,7 @@
       <a class="hide-sm" href="#features">Modules</a>
       <a class="hide-sm" href="#how">How it works</a>
       <a href="#start">Install</a>
+      <a class="hide-sm" href="#first10">First 10 min</a>
       <a href="https://github.com/Natanlsr3/carlo-brain">GitHub</a>
       <button class="theme" id="theme" type="button" aria-label="Toggle light and dark theme">Theme</button>
     </div>
@@ -196,7 +197,8 @@
       <p class="lead">A personal agentic system: a structured memory loaded only where it matters, specialist subagents with ready-made prompts, agents that review and improve it, and connectors to your tools. All in a folder of Markdown you own. Built for Claude Code, and plugged into Codex CLI, Gemini CLI or any other LLM with one command each (Claude Code stays the most complete).</p>
       <div class="btn-row">
         <a class="btn primary" href="#start">Install in 3 commands</a>
-        <a class="btn" href="https://github.com/Natanlsr3/carlo-brain">Star on GitHub</a>
+        <a class="btn" href="#first10">Your first 10 minutes</a>
+        <a class="btn" href="https://github.com/Natanlsr3/carlo-brain/blob/main/docs/00-features.md">Everything it can do</a>
       </div>
       <div class="badges">
         <span class="badge">MIT</span>
@@ -337,7 +339,8 @@
       <div class="eyebrow">Install</div>
       <h2>Three commands.</h2>
       <p class="lead">You need macOS or Linux, Claude Code, Python 3.9+, git, and Obsidian if you want a comfortable window on your vault. The installer asks for a vault folder, a name for your assistant and your first name.</p>
-      <p>Then fill in <code>00_System/MAP.md</code> with who you are and what you work on. Five minutes, and the most valuable ones.</p>
+      <p>Then fill in <code>00_System/MAP.md</code> with who you are and what you work on. Five minutes, and the most valuable ones. <a href="#first10">How, in 10 minutes</a>.</p>
+      <p><code>proactive</code> and <code>connectors</code> need a source connected first (WhatsApp, Apple Mail, a todo export), so they are not in the snippet. <a href="https://github.com/Natanlsr3/carlo-brain/blob/main/docs/03-connect-your-sources.md">Connect your sources</a>.</p>
       <p>Everything it changes is listed in the install guide, and <code>carlo uninstall</code> puts it back.</p>
     </div>
     <div>
@@ -350,8 +353,8 @@ cd carlo-brain
 <span class="c"># 2. install the core, memory and security</span>
 ./install.sh
 
-<span class="c"># 3. add what you want, check, then start claude</span>
-carlo add proactive self-improve
+<span class="c"># 3. add modules that need no setup, then check</span>
+carlo add agents-skills search review-loop health
 carlo doctor</pre>
       </div>
       <p style="margin-top:16px;color:var(--ink-soft);font-size:.95rem">Full guide: <code>docs/02-install.md</code>. Connect your sources: <code>docs/03-connect-your-sources.md</code>.</p>
@@ -359,7 +362,32 @@ carlo doctor</pre>
   </div>
 </section>
 
-<section id="status">
+<section id="first10">
+  <div class="wrap">
+    <div class="eyebrow">Your first 10 minutes</div>
+    <h2>Fill one file, then start claude.</h2>
+    <p class="lead">Without a map the first boot is empty. Five minutes on one file fixes that.</p>
+    <div class="steps">
+      <div class="step"><div><h3>Fill in your map</h3><p>Open <code>00_System/MAP.md</code> in your vault (default <code>~/carlo-vault</code>): who you are, your three projects, where their files are.</p></div></div>
+      <div class="step"><div><h3>Start <code>claude</code> and read the first message</h3><p>A one-sentence "Ready" that recalls what it knows. Day one has no history, so it is short. Nothing there? Run <code>carlo doctor</code>.</p></div></div>
+      <div class="step"><div><h3>Try three things</h3><p>After one small task, restart and type <code>What did we do last session?</code> Correct it once (<code>Answer in two lines maximum from now on. Remember this.</code>), say <code>yes</code> to the diff and watch a line land in <code>CORRECTIONS.md</code>. Then run <code>carlo search "pricing"</code> in a terminal.</p></div></div>
+      <div class="step"><div><h3>Add the next module, knowing what it needs</h3><p>Nothing needed: <code>agents-skills</code>, <code>search</code>, <code>review-loop</code>, <code>health</code>. Git: <code>sync</code>. A source connected first: <code>proactive</code>, <code>connectors</code>. A long-lived login: <code>self-improve</code>, <code>night</code>.</p></div></div>
+    </div>
+    <div class="code" style="margin-top:24px"><pre><span class="c"># a 6-line MAP.md</span>
+**Who**: Sam, product designer in Lyon. Short answers, works in the evening.
+**Active projects**:
+- Website redesign: pricing page. Entry file: `10_Projects/website/website.md`.
+- Freelance clients: two invoices to chase. Entry file: `10_Projects/clients/clients.md`.
+- Spanish course: 20 min a day. Entry file: `10_Projects/spanish/spanish.md`.
+**Where to look for more**: todo in Reminders, contacts in Contacts.</pre></div>
+    <div class="btn-row">
+      <a class="btn primary" href="https://github.com/Natanlsr3/carlo-brain/blob/main/docs/00-features.md">Everything Carlo Brain can do (one page)</a>
+      <a class="btn" href="https://github.com/Natanlsr3/carlo-brain/blob/main/docs/FR-demarrage.md">Français : démarrage rapide</a>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="status">
   <div class="wrap two">
     <div>
       <div class="eyebrow">Honest status</div>

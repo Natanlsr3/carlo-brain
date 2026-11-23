@@ -152,6 +152,14 @@ class EndToEndTest(unittest.TestCase):
             self.assertIn("Chief of Staff for the user", (env.claude / "CLAUDE.md").read_text())
             self.assertNotIn("friend", (env.claude / "CLAUDE.md").read_text())
 
+    def test_init_ends_with_the_map_hint(self):
+        with support.BrainEnv(with_vault=False) as env:
+            for modules in ("none", "memory"):
+                res = self.init(env, modules)
+                self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+                last = res.stdout.strip().splitlines()[-1]
+                self.assertEqual(last, f"Next: fill {env.vault / '00_System' / 'MAP.md'} (5 min), then run claude")
+
     def test_install_doctor_remove_uninstall_leaves_user_files_intact(self):
         with support.BrainEnv(with_vault=False) as env:
             settings = env.claude / "settings.json"
