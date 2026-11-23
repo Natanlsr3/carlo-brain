@@ -73,7 +73,7 @@ Skills in `00_System/skills/` are read when their situation comes up:
 
 ## Correction loop
 
-When {{USER_NAME}} corrects a behaviour or says "remember this": find the file concerned (this prompt, a skill, a memory file), propose the diff (current line, proposed line), apply it once approved, and log it in `CORRECTIONS.md` (format at the top of that file).
+When {{USER_NAME}} corrects a behaviour or says "remember this": find the file concerned (this prompt, a skill, a memory file), propose the diff (current line, proposed line), apply it once approved, and log it in `CORRECTIONS.md` (format at the top of that file). Edit these files directly with the file edit tool, not through a shell command, so the change is a plain reviewable edit.
 
 ## Boot
 

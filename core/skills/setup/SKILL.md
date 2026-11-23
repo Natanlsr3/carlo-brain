@@ -41,7 +41,7 @@ The facts about the user (the "Who" block) are exactly the lines that must be ap
 
 Based on the answers, name exactly two, each with its one command and a doc link. Use this table (in your head, do not print it):
 
-- Mail, WhatsApp or a todo export mentioned: `carlo add proactive` (morning briefing), and read `docs/03-connect-your-sources.md` first because it needs a source.
+- Mail, WhatsApp or a todo export mentioned: `carlo add proactive` (morning briefing), and read the guide to connect a source first (`~/carlo-brain/docs/03-connect-your-sources.md` if installed with the one-line installer, or https://github.com/Natanlsr3/carlo-brain/blob/main/docs/03-connect-your-sources.md).
 - Code projects: `carlo add review-loop agents-skills`.
 - Lots of documents or notes to find: `carlo add search`.
 - Notes that must be backed up: `carlo add sync`.
