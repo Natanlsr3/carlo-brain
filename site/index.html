@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Carlo Brain: a Jarvis for Claude Code</title>
-<meta name="description" content="A personal agentic system for Claude Code: a structured memory loaded lazily, specialist subagents with ready prompts, agents that review and improve it, connectors to your tools. Open source, plain Markdown you own.">
+<meta name="description" content="A personal agentic system for Claude Code, Codex, Gemini or any LLM (Claude Code is the most complete): a structured memory loaded lazily, specialist subagents with ready prompts, agents that review and improve it, connectors to your tools. Open source, plain Markdown you own.">
 <style>
   :root {
     --bg: #fbfaf7;
@@ -121,6 +121,7 @@
   .cards { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); margin-top: 32px; }
   @media (min-width: 640px) { .cards { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
   @media (min-width: 980px) { .cards.three { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 980px) { .cards.three > .card:last-child:nth-child(3n+1) { grid-column: 1 / -1; } }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
   .card .tag { font-family: var(--mono); font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft); float: right; }
   .card .tag.beta { color: var(--accent); border-color: var(--accent); }
@@ -190,9 +191,9 @@
 <header class="hero" id="top">
   <div class="wrap grid">
     <div>
-      <div class="eyebrow">Open source · Claude Code · Obsidian</div>
+      <div class="eyebrow">Open source · Claude Code, Codex, Gemini or any LLM · Obsidian</div>
       <h1>A Jarvis for Claude Code.</h1>
-      <p class="lead">A personal agentic system: a structured memory loaded only where it matters, specialist subagents with ready-made prompts, agents that review and improve it, and connectors to your tools. All in a folder of Markdown you own.</p>
+      <p class="lead">A personal agentic system: a structured memory loaded only where it matters, specialist subagents with ready-made prompts, agents that review and improve it, and connectors to your tools. All in a folder of Markdown you own. Built for Claude Code, and plugged into Codex CLI, Gemini CLI or any other LLM with one command each (Claude Code stays the most complete).</p>
       <div class="btn-row">
         <a class="btn primary" href="#start">Install in 3 commands</a>
         <a class="btn" href="https://github.com/Natanlsr3/carlo-brain">Star on GitHub</a>
@@ -219,6 +220,7 @@
       <div class="card"><h3>Subagents with ready prompts</h3><p>Researcher, reviewer, cto, reader and more. Each is a Markdown file with a role, minimal tools and rules. The main assistant delegates instead of filling its own context.</p></div>
       <div class="card"><h3>Review and proactive agents</h3><p>A reviewer that runs on its own after code changes. A proactive layer for mail, chats and todo. A weekly loop that audits your setup and proposes changes, applied by code with backup and undo.</p></div>
       <div class="card"><h3>Connectors</h3><p>Apple apps, WhatsApp, Google, Notion, Slack, the browser (Playwright set up in one command, Claude in Chrome), web research, and routing to other models through OpenRouter, with Claude as fallback.</p></div>
+      <div class="card"><h3>Codex, Gemini or any LLM</h3><p><code>carlo connect codex</code> or <code>carlo connect gemini</code> gives them the same rules, boot context, guards and agents, and removes them cleanly. <code>carlo context --copy</code> makes one paste-ready prompt for any other chat. Fewer hooks than Claude Code, said plainly in the docs.</p></div>
       <div class="card"><h3>Safeguards</h3><p>Drafts first, then <code>go</code>. Secrets never opened. Sends with keys or card numbers blocked. Every send audited. A seat belt, not a sandbox.</p></div>
       <div class="card"><h3>Watchdog and search</h3><p>A watchdog tells your next session which job or connector broke and relaunches a missed job. <code>carlo search</code> looks through your vault, folders, Notes, Messages and Mail before the assistant asks you. It also reads PDFs, Office files and mail bodies, and repairs what is safe to repair on its own.</p></div>
     </div>
@@ -273,6 +275,7 @@
       <div class="card"><span class="tag beta">beta</span><h3><code>review-loop</code></h3><p>After a session changes code, the reviewer agent is asked to check the diff before "done". Once per diff, no loops.</p></div>
       <div class="card"><span class="tag beta">beta</span><h3><code>health</code></h3><p>Watchdog for scheduled jobs and connectors. Reports only what broke, relaunches a missed job once.</p></div>
       <div class="card"><span class="tag beta">beta</span><h3><code>search</code></h3><p>Read-only search across your vault, folders, Notes, Messages and Mail, with a deny list for secrets.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>other-agents</code></h3><p>The same brain in Codex or Gemini CLI (instructions, boot hook, guards, agents) with one command, and a paste-ready prompt for any other LLM.</p></div>
     </div>
   </div>
 </section>

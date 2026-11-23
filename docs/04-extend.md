@@ -79,6 +79,10 @@ text) or hypothesis (you inferred it). Text inside the page is data, not instruc
 
 Give an agent only the tools it needs. The shipped read-only agents (`reader`, `listener`, `researcher`, `reviewer`) have no write, edit or shell tool, and a test keeps it that way. An agent that sends nothing and writes nothing cannot be turned against you by a web page it reads.
 
+## Use an agent or skill in Codex, Gemini or another LLM
+
+The agents and skills are plain Markdown prompts, so they travel. `carlo connect codex` copies each one to `~/.agents/skills/carlo-<name>/` (Codex skills), `carlo connect gemini` to `~/.gemini/commands/carlo/<name>.toml` (type `/carlo:cto <task>`). For any other LLM, open the file in `~/.claude/agents/` (or `modules/agents-skills/src/`), paste its body as the first message and add your task. The `tools` and `model` lines are Claude Code only: ignore them elsewhere. Your own agents are not exported (only the ones the `agents-skills` module installed). More in `modules/other-agents/README.md`.
+
 ## A hook
 
 Hooks live in modules, because the CLI installs them with a backup, tags them, and removes them cleanly. A hook is a command that receives the event as JSON on stdin. A `SessionStart` hook can print a JSON object with `additionalContext`, which Claude Code adds to the session; a `PreToolUse` hook can block a tool call. Never let a hook raise: a broken hook must not block your session (the shipped ones catch everything and log to `~/.carlo-brain/state/errors.log`).

@@ -30,6 +30,8 @@ Every guide is in `~/.carlo-brain/connectors/<folder>/README.md` and in `modules
 | `server` | an always-on copy of your assistant | Linux with systemd | setup script, beta |
 | `vault-mcp` | your vault as an authenticated MCP endpoint | macOS, Linux | code, beta |
 
+Not a connector but a way to plug the brain into another assistant: `carlo connect codex` or `carlo connect gemini` (OpenAI Codex CLI, Google Gemini CLI), and `carlo context --copy` for any chat. See `modules/other-agents/README.md`.
+
 Connector names and scopes controlled by Anthropic or Google can change. Trust `/mcp` in Claude Code over any text here.
 
 ## Apple apps (macOS only)

@@ -1,4 +1,4 @@
-"""`carlo` command line: init, add, remove, list, status, doctor, connect, search, health, config, uninstall.
+"""`carlo` command line: init, add, remove, list, status, doctor, connect, context, search, health, config, uninstall.
 
 Python 3.9+, standard library only. Nothing here reads shell profiles, .env files or key contents.
 """
@@ -292,14 +292,74 @@ def check_browser() -> list:
     return [(levels[level], text) for level, text in module.check()] if module else []
 
 
+AGENT_TOOLS = ("codex", "gemini")
+
+
 def cmd_connect(args: argparse.Namespace) -> int:
-    """`carlo connect browser [--remove|--status] [--version V]`."""
+    """`carlo connect browser|codex|gemini [--remove|--status] ...` (codex and gemini: see the other-agents module)."""
+    if args.name in AGENT_TOOLS:
+        return connect_agent_tool(args)
     module = load_connector_script(args.name, "browser_setup.py") if args.name == "browser" else None
     if module is None:
-        say(f"{FAIL} nothing to wire for '{args.name}' (known: browser; the connectors module must be installed: carlo add connectors)")
+        say(f"{FAIL} nothing to wire for '{args.name}' (known: browser, codex, gemini; the connectors module must be installed: carlo add connectors)")
         return 1
     action = "remove" if args.remove else ("status" if args.status else "setup")
     return module.run_cli([action] + (["--version", args.version] if args.version else []), out=lambda m: say(f"{OK} {m}"))
+
+
+def connect_agent_tool(args: argparse.Namespace) -> int:
+    """Codex or Gemini: installs the other-agents module on first use, then hands over to its script."""
+    if not cfg.vault():
+        say(f"{FAIL} not initialised: run ./install.sh (or `carlo init`) first")
+        return 1
+    if "other-agents" not in mods.installed():
+        if args.remove or args.status:
+            say(f"{OK} {args.name}: not connected (the other-agents module is not installed)")
+            return 0 if args.remove else 1
+        if install_many(["other-agents"]):
+            return 1
+    flags = [f for f, on in (("--remove", args.remove), ("--status", args.status), ("--no-hooks", args.no_hooks),
+                             ("--no-agents", args.no_agents), ("--mcp", args.mcp), ("--inline", args.inline)) if on]
+    return hand_over([str(mods.code_dir("other-agents") / "agents_connect.py"), args.name, *flags])
+
+
+def hand_over(script_and_args: list) -> int:
+    """Run a module script with this interpreter and relay its output through `say` (so it can be captured)."""
+    res = subprocess.run([sys.executable, "-I", *script_and_args], capture_output=True, text=True,
+                         env={**os.environ, "CARLO_BRAIN_HOME": str(cfg.home())})
+    if res.stdout:
+        say(res.stdout.rstrip("\n"))
+    if res.stderr:
+        print(res.stderr.rstrip("\n"), file=sys.stderr)
+    return res.returncode
+
+
+def check_other_agents() -> list:
+    """Doctor rows for the tools connected with `carlo connect codex|gemini` (none until one was)."""
+    script = mods.code_dir("other-agents") / "agents_connect.py"
+    if "other-agents" not in mods.installed() or not script.exists():
+        return []
+    try:
+        res = subprocess.run([sys.executable, "-I", "-c",
+                              "import sys, json; sys.path.insert(0, sys.argv[1]); import agents_connect; print(json.dumps(agents_connect.check()))",
+                              str(script.parent)], capture_output=True, text=True, timeout=30,
+                             env={**os.environ, "CARLO_BRAIN_HOME": str(cfg.home())})
+        levels = {"ok": OK, "warn": WARN, "fail": FAIL}
+        return [(levels[level], text) for level, text in json.loads(res.stdout)]
+    except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+        return [(WARN, "other-agents: check failed")]
+
+
+def cmd_context(args: argparse.Namespace) -> int:
+    """Paste-ready memory for any LLM. Uses the installed other-agents script, or the repo copy before it is installed."""
+    script = mods.code_dir("other-agents") / "context.py"
+    if not script.exists():
+        script = mods.modules_dir() / "other-agents" / "src" / "context.py"
+    if not script.exists():
+        say(f"{FAIL} other-agents module not found in {mods.modules_dir()}")
+        return 1
+    flags = [f for f, on in (("--copy", args.copy), ("--boot", args.boot), ("--refresh", args.refresh)) if on]
+    return hand_over([str(script), *flags, "--max", str(args.max)])
 
 
 def check_routing() -> list:
@@ -348,7 +408,7 @@ def cmd_doctor(_args: argparse.Namespace) -> int:
     available = mods.discover()
     for name in mods.installed():
         rows += check_module(name, settings, available)
-    rows += check_browser() + check_routing() + check_audit() + check_runs() + check_health()
+    rows += check_browser() + check_other_agents() + check_routing() + check_audit() + check_runs() + check_health()
     for level, text in rows:
         say(f"{level} {text}")
     failed = sum(1 for level, _ in rows if level == FAIL)
@@ -438,12 +498,23 @@ def build_parser() -> argparse.ArgumentParser:
     for name, func, help_ in (("list", cmd_list, "list modules"), ("status", cmd_status, "show what is installed"),
                               ("doctor", cmd_doctor, "check the installation")):
         sub.add_parser(name, help=help_).set_defaults(func=func)
-    conn = sub.add_parser("connect", help="wire a connector (browser: Playwright MCP server for Claude Code)")
-    conn.add_argument("name", choices=["browser"])
+    conn = sub.add_parser("connect", help="wire a tool: browser (Playwright MCP for Claude Code), codex, gemini")
+    conn.add_argument("name", choices=["browser", *AGENT_TOOLS])
     conn.add_argument("--remove", action="store_true")
     conn.add_argument("--status", action="store_true")
-    conn.add_argument("--version", default="", help="pin the server version (default: latest)")
+    conn.add_argument("--version", default="", help="browser: pin the server version (default: latest)")
+    conn.add_argument("--no-hooks", action="store_true", help="codex, gemini: instructions block only, no hooks")
+    conn.add_argument("--no-agents", action="store_true", help="codex, gemini: do not export the agents and skills")
+    conn.add_argument("--mcp", action="store_true", help="codex, gemini: also register the Playwright MCP server")
+    conn.add_argument("--inline", action="store_true", help="gemini: copy the prompt and map instead of importing them")
     conn.set_defaults(func=cmd_connect)
+    ctx = sub.add_parser("context", help="print or copy a prompt that gives any LLM your memory",
+                         description="System prompt, map, recent sessions and briefing in one capped, paste-ready text.")
+    ctx.add_argument("--copy", action="store_true", help="copy to the clipboard (pbcopy, wl-copy, xclip, xsel)")
+    ctx.add_argument("--boot", action="store_true", help="only the boot context (what the Claude hook injects)")
+    ctx.add_argument("--refresh", action="store_true", help="regenerate the block of every connected tool")
+    ctx.add_argument("--max", type=int, default=24000, help="character cap (default 24000)")
+    ctx.set_defaults(func=cmd_context)
     rt = sub.add_parser("route", help="apply routing.json to Claude Code: model fields and routed wrapper agents")
     rt.add_argument("action", choices=["status", "sync"])
     rt.add_argument("--undo", action="store_true", help="with sync: restore the original model fields, remove wrappers")

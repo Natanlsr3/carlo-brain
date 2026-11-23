@@ -1,0 +1,10 @@
+name = "other-agents"
+summary = "Use the same brain with OpenAI Codex CLI, Google Gemini CLI or any LLM: `carlo connect codex|gemini`, `carlo context [--copy]` (beta)"
+version = "0.1.0"
+requires = ["memory"]
+deps = ["python3"]
+optional_deps = ["codex", "gemini", "pbcopy", "xclip"]
+platforms = ["macos", "linux"]
+
+# No hook of its own in Claude Code settings. `carlo connect codex|gemini` writes the hooks into the other tool's
+# own files (hooks.json, settings.json), tagged so that `--remove` takes out only ours.

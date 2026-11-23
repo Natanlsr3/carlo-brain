@@ -88,6 +88,8 @@ The hooks below are what the shipped modules register. `carlo status` shows the 
 
 Hooks exit fast. Anything slow (fact extraction, sync, a refresh scan) runs in a detached process. Sessions that Carlo Brain starts itself (`claude -p` in jobs) carry `CARLO_HEADLESS=1`, and the session hooks do nothing in them.
 
+Codex and Gemini have their own hook files; `carlo connect codex|gemini` (module `other-agents`) writes a SessionStart hook that runs the same `boot.py` and, for the pre-tool guards, a small adapter that renames the tool and its arguments to the shape the `security` scripts read. The hooks are tagged like the others and live in `~/.codex/hooks.json` and `~/.gemini/settings.json`, not in Claude Code's settings. See `modules/other-agents/README.md`.
+
 ## The boot.d convention
 
 `~/.carlo-brain/state/boot.d/` is the one place where modules talk to the next session without knowing each other. Any script writes a Markdown file there:

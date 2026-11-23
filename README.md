@@ -8,7 +8,9 @@
 
 ![A Claude Code session opening with the Carlo Brain boot briefing](docs/assets/boot.gif)
 
-**Stable:** core, memory, security and sync. **Beta:** everything else (proactive, connectors, self-improve, night, agents-skills, review-loop, health, search).
+Built for Claude Code, the same brain also plugs into OpenAI Codex CLI, Google Gemini CLI and any other LLM (see [Use it with Codex, Gemini or any LLM](#use-it-with-codex-gemini-or-any-llm)). Claude Code stays the most complete.
+
+**Stable:** core, memory, security and sync. **Beta:** everything else (proactive, connectors, self-improve, night, agents-skills, review-loop, health, search, other-agents).
 
 Claude Code starts every session blind. Carlo Brain gives it the rest of an assistant, the way a Chief of Staff or a Jarvis would work:
 
@@ -76,6 +78,7 @@ Install what you want. The core is always installed. `memory` and `security` are
 | **night** | Queue of multi-step tasks, optional marathon, STATUS line judging, morning report. | beta |
 | **agents-skills** | Agents `researcher`, `reviewer`, `cto`, `reader`, `listener`, `improver`, `video-quiz` and skills `writer`, `docs`, `explainer`, `browse`, installed without overwriting yours. | beta |
 | **review-loop** | After a session changes code, asks the assistant to run the `reviewer` agent before saying done. Once per diff, no loops. | beta |
+| **other-agents** | `carlo connect codex` / `carlo connect gemini` wire the same rules, boot context, guards and agents into OpenAI Codex CLI or Google Gemini CLI (each removable); `carlo context --copy` makes a paste-ready prompt for any other LLM. | beta |
 | **health** | Watchdog for scheduled jobs and connectors: tells your next session what broke, relaunches a missed job once, and repairs known failures (`carlo health repair`). | beta |
 | **search** | `carlo search`: read-only search across the vault, your folders (text, PDF, Word, PowerPoint, Excel), Notes, Messages and Mail (bodies included), with a deny list for secrets. | beta |
 
@@ -112,6 +115,16 @@ carlo add proactive self-improve   # optional modules, any time
 Prerequisites: macOS or Linux, Python 3.9+, git, and [Claude Code](https://docs.claude.com/en/docs/claude-code) installed and logged in. If the installer says `carlo` is not on your PATH, run the one line it prints and open a new terminal.
 
 Then run `carlo doctor` to check the installation and start a new `claude` session. The first boot message confirms it works. Prerequisites and a step-by-step guide: [docs/02-install.md](docs/02-install.md).
+
+## Use it with Codex, Gemini or any LLM
+
+```bash
+carlo connect codex      # or: carlo connect gemini   (add --mcp for Playwright, --remove to undo, --status to check)
+carlo context --copy     # any other LLM: copies one paste-ready prompt (system prompt, map, recent sessions)
+carlo doctor             # shows which tools are connected
+```
+
+What works, tool by tool. Codex: boot context yes (a hook, which you must trust once with `/hooks`), guards yes (secret reads and sends, shell and patches), agents as skills, MCP for Playwright. Gemini: boot context yes (a hook), guards yes (secret reads and shell sends; MCP sends are not guarded), agents as `/carlo:<name>` commands, MCP for Playwright. Any other LLM: the pasted prompt only, so memory at the start of the chat, with no hooks, no guards and no writing back unless that tool can write files. Claude Code stays the most complete (more hooks, subagents, scheduled jobs). Details: [modules/other-agents](modules/other-agents/README.md).
 
 ## Privacy and risks
 
@@ -170,6 +183,8 @@ carlo add <module>... [--force]        carlo remove <module>... [--force]
 carlo list                             carlo status
 carlo doctor                           carlo config get|set <dotted.key> [json value]
 carlo route status                     carlo route sync [--undo]
+carlo connect browser|codex|gemini [--remove|--status]
+carlo context [--copy] [--boot] [--refresh] [--max N]
 carlo uninstall [--purge]
 ```
 
