@@ -16,6 +16,14 @@ Some modules have extra, optional tools: `tmux` (Remote Control), `go` and `uv` 
 
 ## 1. Get the code
 
+One line (clones into `~/carlo-brain`, runs the installer with defaults, vault in `~/carlo-vault`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Natanlsr3/carlo-brain/main/get.sh | bash
+```
+
+Extra arguments go to the installer: `... | bash -s -- --vault ~/notes`. The script never overwrites a `~/carlo-brain` folder that is not a git checkout (set `CARLO_BRAIN_DIR` to clone elsewhere), updates it with `git pull` if it is, and uses no sudo. If you used it, skip to step 3. By hand instead:
+
 ```bash
 git clone https://github.com/Natanlsr3/carlo-brain
 cd carlo-brain
@@ -64,7 +72,9 @@ Each line is `[ok]`, `[warn]` or `[FAIL]`. It checks Python, git and claude, tha
 
 ## 4. Fill in your MAP
 
-Open the vault in Obsidian and edit `00_System/MAP.md`: who you are, your active projects with the entry file of each, where your todo list and contacts live, and any dictation shortcuts. Keep it short, it is read at every session start. This is the single most valuable five minutes of the setup.
+The easy way: run `claude` and type `setup`. The assistant asks at most 6 short questions, shows the `MAP.md` and project files it will write, and writes them on your `yes`. The first session proposes it by itself while `MAP.md` is still the template. To set up Codex or Gemini the same way, run `carlo connect codex` or `carlo connect gemini`, then ask for the `carlo-setup` skill (or `/carlo:setup` in Gemini).
+
+By hand: open the vault in Obsidian, delete the `map-template` comment line at the top, and edit `00_System/MAP.md`: who you are, your active projects with the entry file of each, where your todo list and contacts live, and any dictation shortcuts. Keep it short, it is read at every session start. This is the single most valuable five minutes of the setup.
 
 ## 5. Start a session
 

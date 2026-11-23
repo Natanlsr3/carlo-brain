@@ -122,6 +122,13 @@ class BootTest(unittest.TestCase):
                 "- [ ] **user** `a`: one\n- [ ] **user** `b`: two (suspect: link)\n- [x] **user** `c`: done\n")
             self.assertIn("1 fact(s) to validate", boot.build_context({}))
 
+    def test_setup_line_only_while_map_is_the_template(self):
+        line = "MAP.md is still the template: offer the user to run the setup interview (say 'setup')."
+        with support.BrainEnv() as env:
+            self.assertIn(line, boot.build_context({}))
+            (env.system / "MAP.md").write_text("**Who**: Sam, designer.\n")
+            self.assertNotIn(line, boot.build_context({}))
+
     def test_compaction_note(self):
         with support.BrainEnv() as env:
             folder = cfg.state_dir() / "compactions"

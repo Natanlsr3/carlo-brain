@@ -18,6 +18,7 @@ from typing import Optional
 import carlo_config as cfg
 import carlo_modules as mods
 import carlo_settings as settings_io
+import carlo_skills
 
 DEFAULT_MODULES = ("memory", "security")
 TEXT_SUFFIXES = {".md", ".tmpl", ".txt", ".toml", ".json"}
@@ -100,6 +101,8 @@ def cmd_init(args: argparse.Namespace) -> int:
     block = render_text((repo / "core" / "CLAUDE.md.tmpl").read_text(encoding="utf-8"), values)
     made_md = settings_io.install_block(block)
     cfg.save_config({**cfg.load_config(), "claude_md_created": bool(made_md or cfg.get("claude_md_created"))})
+    for line in carlo_skills.install(repo / "core" / "skills"):
+        say(line)
     say(f"Vault ready at {vault} ({len(created)} new files). CLAUDE.md block installed in {settings_io.claude_md_path()}.")
     link = link_cli(repo)
     say(f"CLI linked at {link}" if link else "CLI link skipped (a file already exists there).")
@@ -109,7 +112,8 @@ def cmd_init(args: argparse.Namespace) -> int:
             f"  echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> {rc}")
     status = install_many(wanted, force=args.force) if wanted else 0
     if status == 0:
-        say(f"Next: fill {vault / '00_System' / 'MAP.md'} (5 min), then run claude")
+        say("Next: run claude and type: setup (5 questions, it fills your map)")
+        say(f"Or edit {vault / '00_System' / 'MAP.md'} by hand.")
     return status
 
 
@@ -468,6 +472,8 @@ def cmd_uninstall(args: argparse.Namespace) -> int:
         except (mods.ModuleError, settings_io.SettingsError) as exc:
             say(f"{FAIL} {name}: {exc}")
             return 1
+    for line in carlo_skills.uninstall():
+        say(f"{OK} {line}")
     removed = settings_io.remove_block(delete_if_empty=bool(cfg.get("claude_md_created")))
     say(f"{OK} CLAUDE.md block removed" if removed else f"{OK} no CLAUDE.md block found")
     link = Path.home() / ".local" / "bin" / "carlo"

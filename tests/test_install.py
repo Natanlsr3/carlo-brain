@@ -157,8 +157,31 @@ class EndToEndTest(unittest.TestCase):
             for modules in ("none", "memory"):
                 res = self.init(env, modules)
                 self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
-                last = res.stdout.strip().splitlines()[-1]
-                self.assertEqual(last, f"Next: fill {env.vault / '00_System' / 'MAP.md'} (5 min), then run claude")
+                lines = res.stdout.strip().splitlines()
+                self.assertEqual(lines[-2], "Next: run claude and type: setup (5 questions, it fills your map)")
+                self.assertEqual(lines[-1], f"Or edit {env.vault / '00_System' / 'MAP.md'} by hand.")
+
+    def test_setup_skill_is_installed_kept_if_yours_and_removed(self):
+        with support.BrainEnv(with_vault=False) as env:
+            skill = env.claude / "skills" / "setup" / "SKILL.md"
+            self.assertEqual(self.init(env, "none").returncode, 0)
+            text = skill.read_text()
+            self.assertIn("name: setup", text)
+            for trigger in ("setup", "set me up", "configure Carlo", "onboard me"):
+                self.assertIn(trigger, text.split("---")[1])
+            self.assertTrue((env.brain / "core-skills" / "setup" / "SKILL.md").exists())
+            skill.write_text("my own setup skill\n")
+            self.assertEqual(self.init(env, "none").returncode, 0)
+            self.assertEqual(skill.read_text(), "my own setup skill\n")
+            self.assertEqual(skill.with_name("SKILL.md.new").read_text(), text)
+            self.assertEqual(carlo(env, "uninstall").returncode, 0)
+            self.assertTrue(skill.exists(), "an edited file is never removed")
+
+    def test_setup_skill_removed_on_uninstall_when_untouched(self):
+        with support.BrainEnv(with_vault=False) as env:
+            self.assertEqual(self.init(env, "none").returncode, 0)
+            self.assertEqual(carlo(env, "uninstall").returncode, 0)
+            self.assertFalse((env.claude / "skills" / "setup").exists())
 
     def test_install_doctor_remove_uninstall_leaves_user_files_intact(self):
         with support.BrainEnv(with_vault=False) as env:

@@ -1,5 +1,7 @@
 # MAP: {{USER_NAME}} at a glance (injected every session)
 
+<!-- map-template: still the template. The setup skill (type "setup" in claude) removes this line. If you edit by hand, delete this line. -->
+
 Keep this file short. It is read at every session start, so every line must earn its place.
 
 **Who**: {{USER_NAME}}. (Add: role, location, how you like to work, constraints such as "dictates by voice", "works in bursts in the evening".)

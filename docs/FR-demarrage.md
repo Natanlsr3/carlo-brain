@@ -9,11 +9,16 @@ Carlo Brain donne une mémoire et des garde-fous à Claude Code (et aussi à Cod
 Il te faut macOS ou Linux, Python 3.9 ou plus, git, et Claude Code installé et connecté.
 
 ```bash
-git clone https://github.com/Natanlsr3/carlo-brain && cd carlo-brain
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/Natanlsr3/carlo-brain/main/get.sh | bash
 ```
 
-Le programme te pose trois questions (dossier du vault, nom de l'assistant, ton prénom). Sa dernière ligne te dit quoi faire ensuite. Si `carlo` n'est pas trouvé, copie la ligne qu'il affiche, puis ouvre un nouveau terminal. Ensuite, des modules optionnels qui marchent sans réglage :
+Le script clone le projet dans `~/carlo-brain`, installe avec les réglages par défaut (vault dans `~/carlo-vault`) et affiche la suite. Il n'utilise pas sudo et n'écrase jamais un dossier `~/carlo-brain` qui n'est pas un dépôt git. Si `carlo` n'est pas trouvé, copie la ligne qu'il affiche, puis ouvre un nouveau terminal. À la main, si tu préfères :
+
+```bash
+git clone https://github.com/Natanlsr3/carlo-brain && cd carlo-brain && ./install.sh
+```
+
+Ensuite, des modules optionnels qui marchent sans réglage :
 
 ```bash
 carlo add agents-skills search review-loop health
@@ -24,18 +29,9 @@ Attention : `proactive` (le briefing du matin) et `connectors` (WhatsApp, Mail, 
 
 ## Tes 10 premières minutes
 
-1. **Remplis ta carte (5 minutes).** Ouvre `00_System/MAP.md` dans ton vault (par défaut `~/carlo-vault`). Écris qui tu es, tes trois projets principaux et où se trouvent leurs fichiers. Sans ça, le premier démarrage est vide. Exemple :
+1. **Lance `claude` et écris `setup` (5 minutes).** L'assistant te pose 6 questions courtes au maximum, une à la fois : qui tu es, comment tu aimes les réponses, tes 1 à 3 projets et où sont leurs fichiers, où vivent ta todo, ton agenda et tes contacts, et ce que tu veux qu'il fasse en premier. Il te montre la carte (`00_System/MAP.md`) et les fiches projet qu'il va écrire, puis les écrit quand tu réponds `yes`. Plus de fichier à éditer à la main. Sur une installation neuve, il te le propose tout seul. À la fin il te suggère les 2 modules à ajouter ensuite.
 
-   ```markdown
-   **Who**: Sam, designer produit à Lyon. Aime les réponses courtes, travaille le soir.
-   **Active projects** (read the entry file BEFORE working on a project):
-   - Refonte du site : page tarifs, tests du paiement encore rouges. Entry file: `10_Projects/site/site.md`.
-   - Clients freelance : deux factures à relancer. Entry file: `10_Projects/clients/clients.md`.
-   - Cours d'espagnol : 20 minutes par jour. Entry file: `10_Projects/espagnol/espagnol.md`.
-   **Where to look for more**: todo dans Rappels, contacts dans Contacts.
-   ```
-
-2. **Lance `claude`** et lis le premier message. L'assistant dit qu'il est prêt et rappelle ce qu'il sait. Le premier jour il n'a pas d'historique, donc le message est court. Si rien ne s'affiche, lance `carlo doctor`.
+2. **Relance une session** et lis le premier message. L'assistant dit qu'il est prêt et rappelle ce qu'il sait. Le premier jour il n'a pas d'historique, donc le message est court. Si rien ne s'affiche, lance `carlo doctor`.
 
 3. **Essaie trois choses.**
    - Fais une petite tâche, quitte (`/exit`), relance `claude` et écris : `What did we do last session?` La réponse vient du journal de sessions.

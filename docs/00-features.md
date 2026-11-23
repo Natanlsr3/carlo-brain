@@ -1,11 +1,12 @@
 # Everything Carlo Brain can do
 
-One page, plain words. Each line says what a feature does, how you trigger it, and what you type or see. **[beta]** marks modules that are tested on simulated data only (see [Status in the README](../README.md#status)). Everything else is stable. Install a module with `carlo add <name>`; the module that holds each feature is in brackets.
+One page, plain words. Each line says what a feature does, how you trigger it, and what you type or see. **[beta]** marks modules that are tested on simulated data only (see [Status in the reference](11-reference.md#status)). Everything else is stable. Install a module with `carlo add <name>`; the module that holds each feature is in brackets.
 
-New here? Start with [Your first 10 minutes](../README.md#your-first-10-minutes).
+New here? Start with [Your first 10 minutes](../README.md#your-first-10-minutes): run `claude` and type `setup`.
 
 ## Memory
 
+- **Guided setup** [core]. A skill that interviews you in at most 6 short questions and writes your map and project files, so you never edit `MAP.md` by hand. Trigger: type `setup` (also "set me up", "configure Carlo", "onboard me"); a fresh install proposes it by itself. Example: it ends by suggesting your next two modules.
 - **Memory map** [core]. A short file, `00_System/MAP.md`, says who you are, your projects and where their files are. It is loaded at every session start. Trigger: automatic. Example: you fill MAP.md once, and the assistant knows your projects without being told.
 - **Boot briefing** [memory]. At session start the assistant gets the last log entries and anything that needs attention, capped at 9,000 characters. Trigger: type `claude`. Example: "Ready. Yesterday you were on the pricing page."
 - **Session log** [memory]. Every session ends with an entry in `SESSION_LOG.md`; if the assistant forgets, a hook writes a short one. Trigger: automatic. Example: ask "what did we do last session?".

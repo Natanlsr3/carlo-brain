@@ -168,7 +168,8 @@ def prompt_sources() -> List[Tuple[str, dict, str, Optional[Path]]]:
     for path in sorted((base / "agents").glob("*.md")) if (base / "agents").is_dir() else []:
         meta, body = parse_prompt(path.read_text(encoding="utf-8"))
         found.append((meta.get("name", path.stem), meta, body, None))
-    for path in sorted((base / "skills").glob("*/SKILL.md")) if (base / "skills").is_dir() else []:
+    folders = [base / "skills", cfg.home() / "core-skills"]  # module skills, then the core skills (setup)
+    for path in sorted(p for folder in folders if folder.is_dir() for p in folder.glob("*/SKILL.md")):
         meta, body = parse_prompt(path.read_text(encoding="utf-8"))
         found.append((meta.get("name", path.parent.name), meta, body, path.parent))
     return found

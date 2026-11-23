@@ -121,6 +121,12 @@ def fit(header: str, sections: list, limit: int = MAX_CONTEXT) -> str:
     return out[:limit]
 
 
+def map_is_template(system: Path) -> bool:
+    """True while MAP.md still carries the template marker or placeholder (the user never filled it in)."""
+    text = read(system / "MAP.md")
+    return bool(text) and ("<!-- map-template" in text or "(Project name):" in text)
+
+
 def build_context(event: dict, now=None) -> str:
     system = cfg.system_dir()
     sections: list = []
@@ -128,6 +134,8 @@ def build_context(event: dict, now=None) -> str:
     if problems:
         sections.append(("Needs attention (Carlo Brain health)", problems + "\n\nTell the user in one line."))
     sections += dropins(cfg.boot_dir())
+    if system and map_is_template(system):
+        sections.append(("Setup", "MAP.md is still the template: offer the user to run the setup interview (say 'setup')."))
     note = compaction_note(event)
     if note:
         sections.append(note)
