@@ -1,0 +1,29 @@
+name = "connectors"
+summary = "Ways in and out: Apple apps (read-only), WhatsApp, Google, Notion, Slack, browser, web research, phone control, a personal server, a self-hosted vault MCP."
+version = "0.1.0"
+deps = ["python3"]
+optional_deps = ["claude", "tmux", "go", "uv"]
+
+# No hooks and no scheduled jobs: connectors are tools the assistant and the other modules call.
+# `carlo status` shows these notes for installed modules. Each one has a setup guide in
+# ~/.carlo-brain/connectors/<folder>/README.md.
+
+[[mcp]]
+name = "claude.ai connectors"
+note = "Gmail, Google Calendar, Drive, Docs, Sheets, Notion, Slack: connect them at claude.ai Settings > Connectors, then check /mcp (guides: google, notion, slack)"
+
+[[mcp]]
+name = "whatsapp"
+note = "claude mcp add whatsapp ... via whatsapp/install_bridge.sh (pinned commit of lharries/whatsapp-mcp)"
+
+[[mcp]]
+name = "playwright"
+note = "claude mcp add playwright -s user -- npx @playwright/mcp@latest (guide: browser)"
+
+[[mcp]]
+name = "context7"
+note = "claude mcp add context7 -s user -- npx -y @upstash/context7-mcp (guide: web-research)"
+
+[[mcp]]
+name = "vault"
+note = "optional self-hosted vault server: vault-mcp/register_client.sh <token-file> <url>"

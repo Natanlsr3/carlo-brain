@@ -1,0 +1,18 @@
+name = "sync"
+summary = "Git sync of the vault at session start and end (optional remote, optional server copy)"
+version = "0.1.0"
+requires = ["memory"]
+deps = ["python3", "git"]
+optional_deps = ["ssh"]
+platforms = ["macos", "linux"]
+
+[[hooks]]
+event = "SessionStart"
+matcher = "startup|clear"
+command = "{PY} -I {CODE}/sync.py start --detach"
+timeout = 5
+
+[[hooks]]
+event = "SessionEnd"
+command = "{PY} -I {CODE}/sync.py end --detach"
+timeout = 5

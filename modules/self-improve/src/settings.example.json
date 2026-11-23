@@ -1,0 +1,27 @@
+{
+  "tiers": {
+    "auto": [
+      "{VAULT}/00_System/memory/**",
+      "{VAULT}/00_System/skills/**",
+      "~/.claude/agents/*.md",
+      "~/.claude/skills/**",
+      "~/.carlo-brain/config.d/*.json"
+    ],
+    "review": [
+      "{VAULT}/00_System/*.md",
+      "~/.claude/CLAUDE.md",
+      "~/.claude/settings.json",
+      "~/.claude/settings.local.json",
+      "**/*mail*",
+      "**/*whatsapp*",
+      "**/*slack*",
+      "**/*telegram*",
+      "**/*linkedin*",
+      "**/*send*"
+    ]
+  },
+  "verify": {
+    "forbidden_in_markdown": [],
+    "test_timeout_s": 60
+  }
+}

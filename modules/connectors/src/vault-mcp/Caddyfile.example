@@ -1,0 +1,8 @@
+# TLS reverse proxy in front of the vault MCP server (Caddy gets the certificate by itself).
+# Replace the host name with a DNS name that points at your server, then `sudo caddy reload`.
+vault.example.com {
+    reverse_proxy 127.0.0.1:8765
+    # Optional second lock: only your own IPs (the bearer token is still required).
+    # @blocked not remote_ip 203.0.113.10
+    # respond @blocked 403
+}

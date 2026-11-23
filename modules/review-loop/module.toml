@@ -1,0 +1,17 @@
+name = "review-loop"
+summary = "Opt-in Stop hook: when a session changed code, ask Claude to run the reviewer agent on the diff before claiming done (once per diff, capped)"
+version = "0.1.0"
+requires = []
+deps = ["python3", "git"]
+optional_deps = []
+platforms = ["macos", "linux"]
+
+[[hooks]]
+event = "SessionStart"
+command = "{PY} -I {CODE}/review_loop.py start"
+timeout = 5
+
+[[hooks]]
+event = "Stop"
+command = "{PY} -I {CODE}/review_loop.py stop"
+timeout = 10

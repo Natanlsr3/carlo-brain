@@ -1,0 +1,35 @@
+{
+  "identity": {
+    "names": ["YourFirstName"],
+    "addresses": ["you@example.com"]
+  },
+  "lookback_hours": 30,
+  "refresh_minutes": 120,
+  "sources": {
+    "whatsapp": {"enabled": false, "db": "", "group_min_messages": 3, "extra_keywords": [], "write_raw": false},
+    "apple_mail": {"enabled": false, "root": "", "unread_direct": true, "max_items": 5},
+    "followups": {"enabled": false, "min_wait_days": 2, "max_wait_days": 21, "keep_replies_hours": 48,
+                  "ignore": [], "channels": ["whatsapp", "mail"]},
+    "schedules": {"enabled": false, "days": 7, "keywords": [], "max_items": 5},
+    "slots": {"enabled": false, "max_items": 20},
+    "todo": {"enabled": false, "file": "~/.carlo-brain/state/todo_export.json"}
+  },
+  "contacts": {"csv": ""},
+  "scoring": {
+    "kinds": {
+      "reply": {"weight": 100, "cap": 3},
+      "deadline": {"weight": 80, "cap": 3},
+      "schedule": {"weight": 60, "cap": 2},
+      "followup": {"weight": 40, "cap": 2},
+      "direct_unanswered": {"weight": 35, "cap": 2},
+      "direct_unread": {"weight": 30, "cap": 2},
+      "group_activity": {"weight": 18, "cap": 1},
+      "slot": {"weight": 20, "cap": 1},
+      "mention": {"weight": 15, "cap": 1}
+    },
+    "important_names": [],
+    "important_bonus": 5
+  },
+  "briefing": {"max_points": 5, "max_words": 200, "words_per_point": 22, "boot_max_chars": 1400},
+  "voice": {"enabled": false, "hours": [6, 13], "command": "", "voice": "", "prefer": ["Samantha", "Alex"]}
+}

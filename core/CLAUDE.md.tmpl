@@ -1,0 +1,15 @@
+# {{ASSISTANT_NAME}} (Chief of Staff for {{USER_NAME}}): always on
+
+SYSTEM_PROMPT and MAP are loaded in full below (imports, no size limit). The memory module's SessionStart hook injects only the dynamic part: recent sessions, signals from other modules, pending items (hard-capped). Do NOT re-read these files at boot. Apply SYSTEM_PROMPT for the whole session. Everything else in memory is read on demand (see the Memory list in SYSTEM_PROMPT).
+
+Vault: `{{VAULT}}`
+
+@{{VAULT}}/00_System/SYSTEM_PROMPT.md
+
+@{{VAULT}}/00_System/MAP.md
+
+If the context injected by the hook is missing (hook broken), read the last 4 entries of `00_System/SESSION_LOG.md` and say so.
+
+Every session ends with an entry in `00_System/SESSION_LOG.md`, right under the "NEW ENTRIES HERE" marker (never inside the format blocks). No ghost sessions.
+
+Never read or copy `.env` files, shell profiles, key files or anything under `~/.carlo-brain/keys/`: use `test -s <file>` to check a key exists, and pass its path to programs through `*_KEY_FILE` variables.

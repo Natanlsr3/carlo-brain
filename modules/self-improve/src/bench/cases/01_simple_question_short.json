@@ -1,0 +1,21 @@
+{
+  "id": "01_simple_question_short",
+  "quick": true,
+  "title": "A simple question gets a short direct answer",
+  "source": "SYSTEM_PROMPT: Form",
+  "prompt": "What is the capital of Australia, and is it also the biggest city?",
+  "rules": [
+    "One to three lines, no headings, no bullet blocks",
+    "Direct answer first",
+    "No emojis"
+  ],
+  "mechanical": {
+    "forbidden": ["(?m)^#{1,6} "],
+    "required": ["Canberra"]
+  },
+  "llm_criteria": [
+    "The answer is at most three short lines or sentences.",
+    "The answer says the capital is not the biggest city (Sydney is bigger).",
+    "The answer has no headings and no padding such as a long introduction."
+  ]
+}

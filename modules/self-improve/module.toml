@@ -1,0 +1,18 @@
+name = "self-improve"
+summary = "A closed improvement loop: weekly scout and improver jobs propose changes, code classifies them by tier, applies safe ones with backup and checks, and restores on failure. Plus a personal bench and a scheduler with catch-up."
+version = "0.1.0"
+deps = ["python3"]
+optional_deps = ["claude"]
+platforms = ["macos", "linux"]
+
+# Catches up missed scheduled tasks, applies proposals that arrived, and writes a short note about anything
+# that failed or waits for you. Never blocks and never raises.
+[[hooks]]
+event = "SessionStart"
+command = "{PY} -I {CODE}/main.py boot"
+
+# One job starts whatever is due (weekly tasks, with catch-up after sleep). On Linux the CLI prints a cron line.
+[[launchd]]
+label = "tick"
+command = "{PY} -I {CODE}/main.py tick"
+interval = 1800

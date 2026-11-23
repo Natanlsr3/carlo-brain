@@ -1,0 +1,8 @@
+{
+  "title": "Example: weekly research digest in three steps",
+  "steps": 3,
+  "model": "sonnet",
+  "allowed_tools": "Read,Grep,Glob,Edit,Write,WebSearch,WebFetch",
+  "add_dirs": [],
+  "denied_tools": []
+}

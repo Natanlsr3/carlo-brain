@@ -1,0 +1,7 @@
+name = "search"
+summary = "Read-only search over your whole computer (vault, folders, Apple Notes, Messages, Mail, optionally Spotlight): `carlo search`, plus a skill so the assistant looks before it asks you."
+version = "0.1.0"
+deps = ["python3"]
+optional_deps = []
+
+# No hooks and no scheduled jobs: it is a command (`carlo search "<query>"`) and a skill (find-it).

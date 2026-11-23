@@ -1,0 +1,46 @@
+name = "security"
+summary = "Secret-read blocker, outgoing-send guard with hash-chained audit log, alignment and loop guardrails"
+version = "0.1.0"
+requires = []
+deps = ["python3"]
+optional_deps = []
+platforms = ["macos", "linux"]
+
+[[hooks]]
+event = "PreToolUse"
+matcher = "Bash|Read|Grep|Glob|Edit|Write|NotebookEdit"
+command = "{PY} -I {CODE}/block_secret_reads.py"
+timeout = 5
+
+[[hooks]]
+event = "PreToolUse"
+matcher = "Bash|mcp__.*"
+command = "{PY} -I {CODE}/send_guard.py tool"
+timeout = 5
+
+[[hooks]]
+event = "PostToolUse"
+matcher = "Bash|mcp__.*"
+command = "{PY} -I {CODE}/audit.py record"
+timeout = 5
+
+[[hooks]]
+event = "UserPromptSubmit"
+command = "{PY} -I {CODE}/send_guard.py prompt"
+timeout = 5
+
+[[hooks]]
+event = "UserPromptSubmit"
+command = "{PY} -I {CODE}/guardrails.py prompt"
+timeout = 5
+
+[[hooks]]
+event = "PostToolUse"
+matcher = "Edit|Write|MultiEdit|NotebookEdit|Bash"
+command = "{PY} -I {CODE}/guardrails.py post"
+timeout = 5
+
+[[hooks]]
+event = "Stop"
+command = "{PY} -I {CODE}/guardrails.py stop"
+timeout = 5

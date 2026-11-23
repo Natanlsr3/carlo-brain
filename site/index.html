@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carlo Brain: a Jarvis for Claude Code</title>
+<meta name="description" content="A personal agentic system for Claude Code: a structured memory loaded lazily, specialist subagents with ready prompts, agents that review and improve it, connectors to your tools. Open source, plain Markdown you own.">
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --bg-alt: #f2efe8;
+    --surface: #ffffff;
+    --ink: #1c1b19;
+    --ink-soft: #55524b;
+    --line: #e2ddd1;
+    --accent: #c2410c;
+    --accent-ink: #ffffff;
+    --accent-soft: #fde9dc;
+    --term-bg: #17181b;
+    --term-ink: #d9dce1;
+    --term-dim: #8b919c;
+    --term-accent: #f59e0b;
+    --term-ok: #6ee7a0;
+    --radius: 14px;
+    --max: 1080px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121110;
+      --bg-alt: #1a1917;
+      --surface: #1f1d1b;
+      --ink: #f1eee8;
+      --ink-soft: #b2ada2;
+      --line: #34312c;
+      --accent: #fb923c;
+      --accent-ink: #1a0f06;
+      --accent-soft: #3a2415;
+      --term-bg: #0b0c0e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121110;
+    --bg-alt: #1a1917;
+    --surface: #1f1d1b;
+    --ink: #f1eee8;
+    --ink-soft: #b2ada2;
+    --line: #34312c;
+    --accent: #fb923c;
+    --accent-ink: #1a0f06;
+    --accent-soft: #3a2415;
+    --term-bg: #0b0c0e;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  .grid > *, .two > *, .arch > *, .cards > *, .step > *, .col > * { min-width: 0; }
+  h1, h2, h3, p, li { overflow-wrap: anywhere; }
+  code { overflow-wrap: anywhere; }
+  code, pre { font-family: var(--mono); }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
+  section { padding: 72px 0; }
+  section.alt { background: var(--bg-alt); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  h1, h2, h3 { font-family: var(--serif); line-height: 1.15; margin: 0 0 .5em; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(2.3rem, 6vw, 4rem); }
+  h2 { font-size: clamp(1.7rem, 4vw, 2.5rem); }
+  h3 { font-size: 1.2rem; }
+  p { margin: 0 0 1em; }
+  .eyebrow { font-family: var(--mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .lead { font-size: 1.2rem; color: var(--ink-soft); max-width: 46rem; }
+
+  /* nav */
+  nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; gap: 12px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 1.15rem; color: var(--ink); text-decoration: none; }
+  .nav-links { display: flex; gap: 18px; align-items: center; font-size: .92rem; }
+  .nav-links a { color: var(--ink-soft); text-decoration: none; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links .hide-sm { display: none; }
+  @media (min-width: 760px) { .nav-links .hide-sm { display: inline; } }
+  button.theme { background: none; border: 1px solid var(--line); color: var(--ink-soft); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: .85rem; cursor: pointer; }
+  button.theme:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+  /* hero */
+  .hero { padding: 80px 0 56px; }
+  .hero .grid { display: grid; gap: 40px; grid-template-columns: minmax(0, 1fr); align-items: center; }
+  @media (min-width: 900px) { .hero .grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); } }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0 8px; }
+  .btn { display: inline-block; padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--ink); background: var(--surface); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn:hover { filter: brightness(1.05); }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .badge { font-family: var(--mono); font-size: .76rem; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft); background: var(--surface); }
+  .badge.warn { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+  /* terminal */
+  .term { background: var(--term-bg); color: var(--term-ink); border-radius: var(--radius); box-shadow: 0 20px 50px rgba(0,0,0,.22); overflow: hidden; border: 1px solid #00000022; }
+  .term-bar { display: flex; gap: 7px; align-items: center; padding: 11px 14px; background: #ffffff0d; }
+  .term-bar i { width: 11px; height: 11px; border-radius: 50%; background: #ffffff33; display: block; }
+  .term-bar span { margin-left: 10px; font-family: var(--mono); font-size: .74rem; color: var(--term-dim); }
+  .term pre { margin: 0; padding: 18px 18px 22px; font-size: .84rem; line-height: 1.65; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+  .term .p { color: var(--term-accent); }
+  .term .d { color: var(--term-dim); }
+  .term .ok { color: var(--term-ok); }
+  .term .q { color: var(--term-accent); font-weight: 600; }
+
+  .hero-gif { display: block; width: 100%; height: auto; border-radius: var(--radius); box-shadow: 0 20px 50px rgba(0,0,0,.22); border: 1px solid #00000022; }
+
+  /* cards */
+  .cards { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); margin-top: 32px; }
+  @media (min-width: 640px) { .cards { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  @media (min-width: 980px) { .cards.three { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .card .tag { font-family: var(--mono); font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft); float: right; }
+  .card .tag.beta { color: var(--accent); border-color: var(--accent); }
+  .card h3 { font-family: var(--sans); font-weight: 700; font-size: 1.05rem; }
+  .card h3 code { font-size: .95em; }
+  .card p { color: var(--ink-soft); font-size: .96rem; margin: 0; }
+
+  /* day timeline */
+  .steps { display: grid; gap: 14px; margin-top: 32px; counter-reset: step; }
+  .step { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .step::before { counter-increment: step; content: counter(step); width: 36px; height: 36px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-family: var(--mono); font-weight: 700; }
+  .step h3 { font-family: var(--sans); font-weight: 700; margin-bottom: .2em; }
+  .step p { margin: 0; color: var(--ink-soft); font-size: .98rem; }
+
+  /* two col */
+  .two { display: grid; gap: 40px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 900px) { .two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+  /* architecture */
+  .arch { margin-top: 32px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 900px) { .arch { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr); align-items: stretch; } }
+  .col { display: grid; gap: 10px; align-content: start; }
+  .col h4 { margin: 0 0 2px; font-family: var(--mono); font-size: .76rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); }
+  .node { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
+  .node small { display: block; color: var(--ink-soft); font-size: .8rem; }
+  .node.core { border-color: var(--accent); background: var(--accent-soft); }
+  .flow { text-align: center; color: var(--ink-soft); font-family: var(--mono); font-size: .8rem; }
+  .bootd { margin-top: 18px; padding: 14px 16px; border: 1px dashed var(--accent); border-radius: 10px; color: var(--ink-soft); font-size: .95rem; }
+  .bootd code { color: var(--ink); }
+
+  /* quickstart */
+  .code { position: relative; background: var(--term-bg); color: var(--term-ink); border-radius: 12px; padding: 18px 18px 18px; font-size: .88rem; overflow-x: auto; }
+  .code pre { margin: 0; white-space: pre; }
+  .code .c { color: var(--term-dim); }
+  .copy { position: absolute; top: 10px; right: 10px; background: #ffffff14; color: var(--term-ink); border: 1px solid #ffffff22; border-radius: 8px; padding: 4px 10px; font: inherit; font-size: .75rem; cursor: pointer; }
+  .copy:hover { background: #ffffff26; }
+  .hero .code { margin-top: 22px; }
+
+  ul.tick { list-style: none; padding: 0; margin: 0; }
+  ul.tick li { padding-left: 26px; position: relative; margin-bottom: .6em; color: var(--ink-soft); }
+  ul.tick li::before { content: ""; position: absolute; left: 0; top: .55em; width: 10px; height: 10px; border-radius: 3px; background: var(--accent); }
+  ul.tick li strong { color: var(--ink); }
+
+  footer { padding: 40px 0 64px; color: var(--ink-soft); font-size: .92rem; border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">Carlo Brain</a>
+    <div class="nav-links">
+      <a class="hide-sm" href="#jarvis">Why</a>
+      <a class="hide-sm" href="#day">A day with it</a>
+      <a class="hide-sm" href="#features">Modules</a>
+      <a class="hide-sm" href="#how">How it works</a>
+      <a href="#start">Install</a>
+      <a href="https://github.com/Natanlsr3/carlo-brain">GitHub</a>
+      <button class="theme" id="theme" type="button" aria-label="Toggle light and dark theme">Theme</button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap grid">
+    <div>
+      <div class="eyebrow">Open source · Claude Code · Obsidian</div>
+      <h1>A Jarvis for Claude Code.</h1>
+      <p class="lead">A personal agentic system: a structured memory loaded only where it matters, specialist subagents with ready-made prompts, agents that review and improve it, and connectors to your tools. All in a folder of Markdown you own.</p>
+      <div class="btn-row">
+        <a class="btn primary" href="#start">Install in 3 commands</a>
+        <a class="btn" href="https://github.com/Natanlsr3/carlo-brain">Star on GitHub</a>
+      </div>
+      <div class="badges">
+        <span class="badge">MIT</span>
+        <span class="badge">macOS + Linux</span>
+        <span class="badge">Python stdlib only</span>
+        <span class="badge warn">beta 0.1</span>
+        <span class="badge">stable: core, memory, security, sync</span>
+      </div>
+    </div>
+    <img class="hero-gif" src="boot.gif" width="1000" height="520" alt="Terminal: a Claude Code session opens with the boot briefing. Five points about replies owed, a missing calendar slot and an overnight job, ending with the question: send the reply to Sam?">
+  </div>
+</header>
+
+<section class="alt" id="jarvis">
+  <div class="wrap">
+    <div class="eyebrow">A Jarvis, not a memory plugin</div>
+    <h2>Memory is one piece. This is the whole assistant.</h2>
+    <p class="lead">A memory plugin remembers context, and a good one does it well. Carlo Brain does not try to out-remember it. It builds the system around the memory, in Markdown you can read and edit.</p>
+    <div class="cards three">
+      <div class="card"><h3>A memory map, loaded lazily</h3><p>A short map of who you are and where each project lives. The boot hook adds the recent past, capped at 9,000 characters. The rest is read on demand, branch by branch.</p></div>
+      <div class="card"><h3>Subagents with ready prompts</h3><p>Researcher, reviewer, cto, reader and more. Each is a Markdown file with a role, minimal tools and rules. The main assistant delegates instead of filling its own context.</p></div>
+      <div class="card"><h3>Review and proactive agents</h3><p>A reviewer that runs on its own after code changes. A proactive layer for mail, chats and todo. A weekly loop that audits your setup and proposes changes, applied by code with backup and undo.</p></div>
+      <div class="card"><h3>Connectors</h3><p>Apple apps, WhatsApp, Google, Notion, Slack, the browser (Playwright set up in one command, Claude in Chrome), web research, and routing to other models through OpenRouter, with Claude as fallback.</p></div>
+      <div class="card"><h3>Safeguards</h3><p>Drafts first, then <code>go</code>. Secrets never opened. Sends with keys or card numbers blocked. Every send audited. A seat belt, not a sandbox.</p></div>
+      <div class="card"><h3>Watchdog and search</h3><p>A watchdog tells your next session which job or connector broke and relaunches a missed job. <code>carlo search</code> looks through your vault, folders, Notes, Messages and Mail before the assistant asks you. It also reads PDFs, Office files and mail bodies, and repairs what is safe to repair on its own.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="wrap two">
+    <div>
+      <div class="eyebrow">The problem</div>
+      <h2>Claude Code is brilliant and forgets everything.</h2>
+      <p class="lead">Every session starts from zero. You re-explain who you are, what you are working on, and which rules it must follow. And it waits to be asked, while the things that hurt are the ones nobody asks about.</p>
+    </div>
+    <ul class="tick">
+      <li><strong>Amnesia.</strong> The same context, every morning.</li>
+      <li><strong>Passivity.</strong> A reply you owe. A schedule that never reached your calendar.</li>
+      <li><strong>Fragility.</strong> A secret printed in a transcript. A message sent that you never read. A self-editing agent that cannot go back.</li>
+      <li><strong>Bloat.</strong> One giant instructions file, slow, costly and half stale.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="alt" id="day">
+  <div class="wrap">
+    <div class="eyebrow">A day with it</div>
+    <h2>It works while you do not.</h2>
+    <div class="steps">
+      <div class="step"><div><h3>Morning briefing, one question</h3><p>Five points, under 200 words, ending with a single closed question. Built from your messages, mail and todo without any model call.</p></div></div>
+      <div class="step"><div><h3>Drafts first, then "go"</h3><p>It prepares the reply and shows it. You type <code>go</code> and exactly that text is sent. Change a word and it comes back to you. Messages with keys or card numbers are blocked before they leave.</p></div></div>
+      <div class="step"><div><h3>Memory across sessions</h3><p>Each session ends with a log entry: done, decided, next. If the assistant forgets, a hook writes one. Corrections you give become rules, with a diff you approve.</p></div></div>
+      <div class="step"><div><h3>A weekly loop that improves it</h3><p>A scout looks outside, an improver audits your setup. They only propose. Code decides: safe edits are applied with a backup and checks, system prompt changes wait for your eyes, anything near secrets is refused. Undo with one command.</p></div></div>
+      <div class="step"><div><h3>Night work</h3><p>Queue a multi-step task. When it is dark, you are home and the laptop is plugged in, it works one step at a time with every send tool denied. Morning: one line per task.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="eyebrow">Modules</div>
+    <h2>Take what you need. Remove it cleanly.</h2>
+    <p class="lead">The core is always installed. Every module is added and removed with one command, and removal restores your settings.</p>
+    <div class="cards three">
+      <div class="card"><span class="tag">tested</span><h3><code>core</code></h3><p>System prompt, a short map of you, session log, corrections log, starter skills. An Obsidian vault plus one managed block in your CLAUDE.md.</p></div>
+      <div class="card"><span class="tag">tested</span><h3><code>memory</code></h3><p>Boot context at session start, hard capped. Automatic log entries, compaction summary, facts to validate, session quality score.</p></div>
+      <div class="card"><span class="tag">tested</span><h3><code>security</code></h3><p>Blocks secret reads and sends that contain secrets. Hash-chained audit of every send. Loop and alignment guardrails.</p></div>
+      <div class="card"><span class="tag">tested</span><h3><code>sync</code></h3><p>Commits your vault at session start and end, optional private remote and server copy. Never force-pushes.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>proactive</code></h3><p>Watches WhatsApp, Apple Mail, todo and follow-ups. Ranked briefing, optional voice. Zero tokens.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>connectors</code></h3><p>Apple apps, WhatsApp, Google, Notion, Slack, browser, web research, phone control, a personal server, a vault MCP endpoint.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>self-improve</code></h3><p>Weekly scout and improver, tiered apply with backup and restore, undo, a personal bench, a scheduler that catches up after sleep.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>night</code></h3><p>Queue of multi-step tasks, optional marathon, judged on a STATUS line, morning report.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>agents-skills</code></h3><p>Researcher, cto, reviewer, reader, listener, improver, video-quiz agents. Writer, docs, explainer skills. Never overwrites yours.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>review-loop</code></h3><p>After a session changes code, the reviewer agent is asked to check the diff before "done". Once per diff, no loops.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>health</code></h3><p>Watchdog for scheduled jobs and connectors. Reports only what broke, relaunches a missed job once.</p></div>
+      <div class="card"><span class="tag beta">beta</span><h3><code>search</code></h3><p>Read-only search across your vault, folders, Notes, Messages and Mail, with a deny list for secrets.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="how">
+  <div class="wrap">
+    <div class="eyebrow">How it fits together</div>
+    <h2>Three things, one convention.</h2>
+    <p class="lead">A vault for memory, hooks for housekeeping, scheduled jobs for what happens between sessions. Modules talk to the next session through a folder of small files.</p>
+    <div class="arch">
+      <div class="col">
+        <h4>Between sessions</h4>
+        <div class="node">Scheduled jobs<small>launchd, cron, a catch-up scheduler</small></div>
+        <div class="node">Connectors<small>mail, chats, calendar, web (read first)</small></div>
+        <div class="node">proactive, night, self-improve, sync<small>write short signal files</small></div>
+        <div class="flow">drop a file</div>
+      </div>
+      <div class="col">
+        <h4>Session start</h4>
+        <div class="node core">boot.d<small>~/.carlo-brain/state/boot.d/*.md</small></div>
+        <div class="flow">merged, capped at 9,000 characters</div>
+        <div class="node core">Boot injector (memory hook)<small>recent log, signals, facts to validate, health</small></div>
+        <div class="flow">plus CLAUDE.md imports SYSTEM_PROMPT and MAP</div>
+        <div class="node">Your session<small>starts with the context it needs, nothing more</small></div>
+      </div>
+      <div class="col">
+        <h4>During and after</h4>
+        <div class="node">security hooks<small>no secret reads, no sends with secrets, audit chain</small></div>
+        <div class="node">PreCompact and SessionEnd<small>save summary, write the log entry, extract facts</small></div>
+        <div class="node">Obsidian vault<small>SYSTEM_PROMPT, MAP, SESSION_LOG, memory, skills, git</small></div>
+        <div class="flow">read on demand next time</div>
+      </div>
+    </div>
+    <div class="bootd">The one convention: any script can add a section to the next session by writing a Markdown file to <code>boot.d/</code>. A first line <code>&lt;!-- once --&gt;</code> deletes it after it is shown. No module imports another.</div>
+  </div>
+</section>
+
+<section id="safe">
+  <div class="wrap two">
+    <div>
+      <div class="eyebrow">Built to be trusted</div>
+      <h2>A seat belt, and honest about its limits.</h2>
+      <p class="lead">Autonomy is only useful if the mistakes it makes are cheap. The defaults are conservative, and the code, not the model, draws the lines.</p>
+    </div>
+    <ul class="tick">
+      <li><strong>Read freely, write on your go.</strong> Show the text, send on <code>go</code>.</li>
+      <li><strong>Secrets are never opened.</strong> Keys live in a mode 600 folder and are passed by path.</li>
+      <li><strong>Unattended never sends.</strong> Every send, create and update tool is denied in night and weekly jobs.</li>
+      <li><strong>Reversible.</strong> Settings edits are backed up and tagged. Automatic changes are archived and undoable.</li>
+      <li><strong>Your subscription, not a surprise bill.</strong> Background calls strip API key variables.</li>
+      <li><strong>Not a sandbox.</strong> It is a pattern-matching seat belt. The docs say where it stops.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="alt" id="start">
+  <div class="wrap two">
+    <div>
+      <div class="eyebrow">Install</div>
+      <h2>Three commands.</h2>
+      <p class="lead">You need macOS or Linux, Claude Code, Python 3.9+, git, and Obsidian if you want a comfortable window on your vault. The installer asks for a vault folder, a name for your assistant and your first name.</p>
+      <p>Then fill in <code>00_System/MAP.md</code> with who you are and what you work on. Five minutes, and the most valuable ones.</p>
+      <p>Everything it changes is listed in the install guide, and <code>carlo uninstall</code> puts it back.</p>
+    </div>
+    <div>
+      <div class="code" id="snippet">
+        <button class="copy" type="button" id="copy">Copy</button>
+<pre><span class="c"># 1. get it</span>
+git clone https://github.com/Natanlsr3/carlo-brain
+cd carlo-brain
+
+<span class="c"># 2. install the core, memory and security</span>
+./install.sh
+
+<span class="c"># 3. add what you want, check, then start claude</span>
+carlo add proactive self-improve
+carlo doctor</pre>
+      </div>
+      <p style="margin-top:16px;color:var(--ink-soft);font-size:.95rem">Full guide: <code>docs/02-install.md</code>. Connect your sources: <code>docs/03-connect-your-sources.md</code>.</p>
+    </div>
+  </div>
+</section>
+
+<section id="status">
+  <div class="wrap two">
+    <div>
+      <div class="eyebrow">Honest status</div>
+      <h2>Beta 0.1.</h2>
+      <p class="lead">The core modules are tested end to end in a temporary home directory. The ones that read your mail and chats, or run while you sleep, are tested against simulated sources and a fake <code>claude</code>.</p>
+    </div>
+    <div>
+      <p>Apple's private database layouts can change with a macOS update, and the WhatsApp bridge is an unofficial client. Each module README has a Known limits section, and the docs cover costs and what uses your subscription. Run unattended jobs by hand first.</p>
+      <p>Issues and pull requests are welcome. MIT licensed. Your vault and keys never leave your machine through this project.</p>
+      <div class="btn-row">
+        <a class="btn primary" href="https://github.com/Natanlsr3/carlo-brain">Try it, star it</a>
+        <a class="btn" href="https://github.com/Natanlsr3/carlo-brain/tree/main/docs">Read the docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Carlo Brain. MIT License. Copyright Carlo Brain contributors.</div>
+    <div><a href="https://github.com/Natanlsr3/carlo-brain">GitHub</a> · <a href="https://github.com/Natanlsr3/carlo-brain/tree/main/docs">Docs</a></div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try {
+    var saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+  } catch (e) {}
+  document.getElementById("theme").addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") === "dark" ||
+      (!root.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+  });
+  var btn = document.getElementById("copy");
+  btn.addEventListener("click", function () {
+    var text = document.querySelector("#snippet pre").innerText;
+    function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () {});
+    }
+  });
+})();
+</script>
+</body>
+</html>

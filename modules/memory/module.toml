@@ -1,0 +1,23 @@
+name = "memory"
+summary = "Session memory: boot context, automatic log entries, compaction summaries, fact queue, quality score, health line"
+version = "0.1.0"
+requires = []
+deps = ["python3"]
+optional_deps = ["claude"]
+platforms = ["macos", "linux"]
+
+[[hooks]]
+event = "SessionStart"
+matcher = "startup|clear|compact"
+command = "{PY} -I {CODE}/boot.py"
+timeout = 10
+
+[[hooks]]
+event = "SessionEnd"
+command = "{PY} -I {CODE}/session_end.py"
+timeout = 10
+
+[[hooks]]
+event = "PreCompact"
+command = "{PY} -I {CODE}/precompact.py"
+timeout = 10

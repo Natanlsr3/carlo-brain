@@ -1,0 +1,16 @@
+name = "proactive"
+summary = "Watches messages, mail and todo, and gives a short ranked briefing (with optional voice) instead of a report."
+version = "0.1.0"
+deps = ["python3"]
+optional_deps = ["claude", "say"]
+
+# Cheap, never blocks: refreshes a stale scan in the background and speaks the briefing once a day if enabled.
+[[hooks]]
+event = "SessionStart"
+command = "{PY} -I {CODE}/run.py boot"
+
+# Keep the briefing fresh between sessions (macOS launchd; on Linux the CLI prints a cron line instead).
+[[launchd]]
+label = "scan"
+command = "{PY} -I {CODE}/run.py run"
+interval = 3600

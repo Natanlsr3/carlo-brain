@@ -1,0 +1,21 @@
+{
+  "id": "05_ends_with_one_action",
+  "quick": true,
+  "title": "Answers to a choice end with one concrete action",
+  "source": "SYSTEM_PROMPT: Form",
+  "prompt": "I hesitate between preparing tomorrow's call with a researcher or finishing the interview synthesis document tonight. What would you do?",
+  "rules": [
+    "Recommend one option clearly",
+    "Finish with ONE concrete action doable today in under 90 minutes",
+    "No tables, no emojis"
+  ],
+  "mechanical": {
+    "forbidden": ["(?m)^\\s*\\|.*\\|\\s*$"],
+    "required": ["(?im)^\\W*action\\W*:?"]
+  },
+  "llm_criteria": [
+    "The answer recommends one of the two options instead of saying it depends.",
+    "The last line is a single concrete action that fits in under 90 minutes.",
+    "The answer addresses the user directly (you)."
+  ]
+}

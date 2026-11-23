@@ -1,0 +1,18 @@
+name = "health"
+summary = "Watchdog: checks that scheduled jobs ran on time and connectors still work, tells your next session only when something is broken, and catches up missed jobs."
+version = "0.1.0"
+requires = ["memory"]
+deps = ["python3"]
+optional_deps = ["claude"]
+
+# Cheap and fast: checks, writes or removes state/boot.d/health.md, relaunches a stale job once. Never raises.
+[[hooks]]
+event = "SessionStart"
+command = "{PY} -I {CODE}/healthcheck.py boot"
+timeout = 10
+
+# Full check every 6 hours, MCP servers included (macOS launchd; on Linux the CLI prints a cron line instead).
+[[launchd]]
+label = "watch"
+command = "{PY} -I {CODE}/healthcheck.py run"
+interval = 21600

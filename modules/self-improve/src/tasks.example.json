@@ -1,0 +1,22 @@
+{
+  "tasks": [
+    {
+      "name": "improver",
+      "command": "python3 -I \"$CARLO_BRAIN_HOME/self-improve/main.py\" job improver",
+      "days": ["sun"],
+      "time": "09:00",
+      "window_h": 72,
+      "catch_up": true,
+      "retries": 1
+    },
+    {
+      "name": "scout",
+      "command": "python3 -I \"$CARLO_BRAIN_HOME/self-improve/main.py\" job scout",
+      "days": ["sat"],
+      "time": "09:00",
+      "window_h": 72,
+      "catch_up": true,
+      "retries": 1
+    }
+  ]
+}

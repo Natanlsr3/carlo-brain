@@ -1,0 +1,24 @@
+# systemd USER unit. Install:
+#   mkdir -p ~/.config/systemd/user && cp carlo-vault-mcp.service ~/.config/systemd/user/
+#   (edit VAULT_MCP_VAULT and the path of server.py)
+#   systemctl --user daemon-reload && systemctl --user enable --now carlo-vault-mcp
+#   loginctl enable-linger "$USER"      # keep it running when you are logged out
+[Unit]
+Description=Carlo vault MCP server (localhost only, put a TLS proxy in front)
+After=network-online.target
+
+[Service]
+Environment=VAULT_MCP_VAULT=%h/vault
+Environment=VAULT_MCP_TOKEN_FILE=%h/.carlo-brain/keys/vault_mcp_token
+Environment=VAULT_MCP_HOST=127.0.0.1
+Environment=VAULT_MCP_PORT=8765
+ExecStart=/usr/bin/python3 %h/.carlo-brain/connectors/vault-mcp/server.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=%h/vault
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

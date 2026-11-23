@@ -1,0 +1,18 @@
+name = "night"
+summary = "Unattended night work: queued multi-step tasks and an optional marathon, started when you are home and plugged in, judged on a STATUS line, with a morning report."
+version = "0.1.0"
+deps = ["python3"]
+optional_deps = ["claude"]
+platforms = ["macos", "linux"]
+
+# Shows last night's report once at the start of the next session. Never blocks.
+[[hooks]]
+event = "SessionStart"
+command = "{PY} -I {CODE}/main.py boot"
+
+# Every 10 minutes: starts the night when it is dark, the laptop is on mains power, the queue is not empty
+# and tonight has not run yet. On Linux the CLI prints the cron line instead.
+[[launchd]]
+label = "trigger"
+command = "{PY} -I {CODE}/main.py trigger"
+interval = 600
